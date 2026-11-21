@@ -4,7 +4,7 @@ Version 1.1 — proposed decisions to review before running Spec Kit. Requiremen
 
 ## 1. Glossary
 
-- Profile: local learner workspace; exactly one active profile when profiles exist.
+- Profile: local learner workspace. At most one profile is active. There is no active profile while the selector awaits explicit selection.
 - Group: optional organizational category for sets; not a nested folder.
 - Flashcard set (deck): collection of cards, belonging to one profile and optionally one group.
 - Card: mandatory front and back text with optional local images.
@@ -16,7 +16,7 @@ Version 1.1 — proposed decisions to review before running Spec Kit. Requiremen
 
 | ID | Rule | Related |
 | --- | --- | --- |
-| BR-01 | First launch opens profile creation/selection; display names are trimmed, non-blank. Persist active ID if it still exists. | FR-01 |
+| BR-01 | Require a trimmed, nonblank display name. Restore a valid saved profile. After active-profile deletion or an invalid selection, show creation if no profiles remain. Otherwise show the selector, even for one survivor. Open Home only after explicit selection in this recovery flow. | FR-01 |
 | BR-02 | A profile's data is logically isolated; all data access checks ownership. Switching profiles clears previous navigation/session state. No password/security boundary is implied. | FR-02 |
 | BR-03 | Group/set names are trimmed and non-blank, descriptions are optional. Proposed limits: names 1–80 characters, descriptions up to 500. Duplicate names are allowed; IDs are authoritative. | FR-03, FR-04 |
 | BR-04 | Groups are flat. Sets are assigned to at most one group; removing a group moves its sets to Ungrouped. | FR-03, FR-04 |
@@ -58,7 +58,7 @@ flowchart TD
 - Capture a queue snapshot on start: overdue and due reviewed cards first (ascending review date then ID), new cards afterward (creation then ID).
 - A new card is eligible immediately; reviewed card eligible iff due date is not later than today's date.
 - Each eligible card appears at most once in the session; forgotten cards return tomorrow, not again in the current session.
-- New cards created mid-session enter a future session, not this snapshot. If a queued card no longer exists or no longer belongs to the active profile, skip it.
+- New cards created mid-session enter a future session, not this snapshot. If a queued card no longer exists or no longer belongs to the active profile, skip it. Keep its place in the frozen ordering: the next card shows its original one-based position out of the original queue size. Skipping card 2 of 3 leaves card 3 at “3 of 3” and contributes zero committed ratings.
 - Empty queue: state that nothing is due; optionally provide a route to Free Study or library, not manual grade before a card is due.
 
 ### BR-11 — Recall response and atomic update (FR-08, FR-09)
@@ -66,7 +66,7 @@ flowchart TD
 - Each card starts on front. Flip is available at any point; a learner must reveal the back at least once before rating.
 - Remembered and Forgot are self-reported. No automatic semantic checking.
 - On rating, disable rating controls during save. Validate eligibility, current ownership and session-card uniqueness. Record grade and new scheduling state atomically.
-- Advance only after successful commit. On failure, keep current card and enable retry; never create duplicate logs.
+- Advance once the committed outcome is known. A rolled-back grade leaves all learning data unchanged and the current card available for retry. If the grade committed but its acknowledgement was lost, retrying the same session/card returns the original committed result without adding a rating or updating the schedule again.
 
 ### BR-12 — Date scheduling (FR-09)
 

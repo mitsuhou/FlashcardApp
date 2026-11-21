@@ -33,7 +33,7 @@ P1 = required MVP, P2 = desirable after stable core, P3 = optional. The original
 | NFR-01 | P1 | Offline use: create profiles, edit cards, study and retrieve schedules in airplane mode. No required network service. |
 | NFR-02 | P1 | Persistence and integrity: confirmed writes are retained across process restart; relationships enforce ownership; failed writes must not partially update rating/schedule. |
 | NFR-03 | P1 | Usability: visible primary actions, meaningful labels, confirmation for destructive actions, error/empty/loading states, clear mode and active profile. |
-| NFR-04 | P1 | Accessibility: labeled icons, non-color-only correctness indicators, touch targets around 48 dp, usable text scaling and readable contrast. |
+| NFR-04 | P1 | Accessibility: labeled icons, non-color-only correctness indicators, touch targets at least 48 × 48 dp and text contrast at least 4.5:1 for normal text or 3:1 for large text. Validate at default (100%) and 130% font scale in both portrait and landscape. |
 | NFR-05 | P1 | Basic adaptive UI: core screens work in portrait/landscape and available screen width without clipped controls or losing committed data; enhanced large-screen layout is P2. |
 | NFR-06 | P1 | Maintainability: UI must not query DAOs directly; scheduler is pure and unit-testable; dependencies remain small and documented. |
 | NFR-07 | P1 | Privacy: local profiles are logical separation, not encryption or identity authentication; image access uses user-selected files and no unnecessary storage/network permissions. |

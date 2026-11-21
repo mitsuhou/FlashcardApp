@@ -233,7 +233,7 @@ The screenshot shows Get a hint, audio, sorting, undo, shuffle, settings and ful
 
 - Support loading, empty, populated, validation/error, saving, retry and confirmation states as appropriate.
 - Display accurate card counts after updates; avoid leaking old profile content during switching.
-- Use accessible semantics, 48 dp or larger touch targets, meaningful icon labels, readable contrast and text scaling. Do not rely only on colors or gestures.
+- Use accessible semantics, touch targets at least 48 × 48 dp, meaningful icon labels, readable contrast and text scaling. Do not rely only on colors or gestures.
 - Compact portrait: single-column navigation and vertically arranged content. Landscape and tablets: wider card layouts, accessible controls and optional expanded presentation. Do not lose committed data or unnecessarily reset the current card on rotation.
 - Allow long content to wrap/scroll, rather than shrinking text until unreadable. Preserve state and provide static alternatives to animation.
 
@@ -245,7 +245,7 @@ The screenshot shows Get a hint, audio, sorting, undo, shuffle, settings and ful
 - Set overflow follows REF-06 with only local valid operations and confirmation before deletion.
 - Free Study never changes persistent learning state.
 - Grade Mode follows REF-07 with a large card, two distinct accessible recall buttons, correct reveal gating, and one persisted rating per successful submission.
-- Editors, Home, summary and empty states share a consistent theme. Core actions remain usable offline, in portrait and landscape, and under increased font scaling.
+- Editors, Home, summary and empty states share a consistent theme. Core actions remain usable offline in portrait and landscape at both default (100%) and 130% font scale. In each configuration, touch targets measure at least 48 × 48 dp and text meets the NFR-04 contrast minima of 4.5:1 for normal text and 3:1 for large text.
 
 ## 15. Spec Kit handoff
 
