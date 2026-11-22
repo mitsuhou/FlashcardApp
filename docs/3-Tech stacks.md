@@ -1,6 +1,6 @@
 # Technical Stack, Architecture & Theoretical Background
 
-Version 1.1 — proposed design inputs, not an implementation plan.
+Version 1.1 — technical background and design inputs for the Android MVP.
 
 ## 1. Learning theory
 
@@ -9,7 +9,7 @@ Version 1.1 — proposed design inputs, not an implementation plan.
 - **Forgetting curve:** a conceptual explanation of declining retention over time, not a universal numerical formula for every learner.
 - **Spaced repetition:** revisiting material at intervals, increasing the interval after successful retrieval and shortening it after forgetting.
 
-### Proposed v1.0 scheduler: binary fixed interval ladder
+### Approved v1.0 scheduler — binary fixed interval ladder
 
 The original two-button Grade Mode is retained. To fit a three-week course project, use a deterministic interval-ladder heuristic inspired by spaced repetition, not a claim of implementing SM-2 or FSRS:
 
@@ -22,7 +22,7 @@ The original two-button Grade Mode is retained. To fit a three-week course proje
 | 5 | 30 |
 | 6 (cap) | 60 |
 
-Remembered increases the stage up to 6; Forgot resets stage to 0 and schedules tomorrow. New cards start at stage 0 and are immediately eligible. For review-date and grade transaction behavior see [business rules](4-Business-Rules.md). Treat the ladder as an explicit proposed baseline to confirm during clarification. SM-2 (quality/ease-factor-based) or FSRS may be considered later; neither is a dependency or required feature.
+Remembered increases the stage up to 6; Forgot resets stage to 0 and schedules tomorrow. New cards start at stage 0 and are immediately eligible. For review-date and grade transaction behavior see [business rules](4-Business-Rules.md). The [specification clarifications of 2026-11-21](../specs/001-offline-flashcard-study/spec.md#session-2026-11-21) approve these intervals and the next-day Forgot reset.
 
 ## 2. Native Android technology
 

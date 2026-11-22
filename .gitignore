@@ -13,5 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
-/.specify/
+/.specify/**
+!/.specify/memory/
+!/.specify/memory/constitution.md
 /.agents/

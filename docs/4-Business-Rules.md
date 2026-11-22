@@ -1,6 +1,6 @@
 # Business Rules & User Workflows
 
-Version 1.1 — proposed decisions to review before running Spec Kit. Requirement IDs refer to the companion Functional Requirements document.
+Version 1.1 — business rules. The P1 rules below incorporate the [specification clarifications of 2026-11-21](../specs/001-offline-flashcard-study/spec.md#session-2026-11-21). Requirement IDs refer to the companion Functional Requirements document.
 
 ## 1. Glossary
 
@@ -18,7 +18,7 @@ Version 1.1 — proposed decisions to review before running Spec Kit. Requiremen
 | --- | --- | --- |
 | BR-01 | Require a trimmed, nonblank display name. Restore a valid saved profile. After active-profile deletion or an invalid selection, show creation if no profiles remain. Otherwise show the selector, even for one survivor. Open Home only after explicit selection in this recovery flow. | FR-01 |
 | BR-02 | A profile's data is logically isolated; all data access checks ownership. Switching profiles clears previous navigation/session state. No password/security boundary is implied. | FR-02 |
-| BR-03 | Group/set names are trimmed and non-blank, descriptions are optional. Proposed limits: names 1–80 characters, descriptions up to 500. Duplicate names are allowed; IDs are authoritative. | FR-03, FR-04 |
+| BR-03 | Trim group/set names and require 1–80 characters. Trim leading and trailing whitespace from optional descriptions before validation and persistence. Store a blank result as absent (null). A nonblank trimmed result may contain up to 500 characters. Duplicate names are allowed; IDs are authoritative. | FR-03, FR-04 |
 | BR-04 | Groups are flat. Sets are assigned to at most one group; removing a group moves its sets to Ungrouped. | FR-03, FR-04 |
 | BR-05 | A set may be empty. Cards have one parent set; front and back text each contain 1–2,000 characters after trimming. Duplicate cards are allowed. | FR-05 |
 | BR-06 | Profile deletion permanently removes all owned groups, sets, cards and review logs. Set deletion removes its cards/logs. Card deletion removes that card/logs. Require explicit confirmation. | FR-01, FR-04, FR-05 |
@@ -70,7 +70,7 @@ flowchart TD
 
 ### BR-12 — Date scheduling (FR-09)
 
-This deterministic proposed policy uses date-only values and an injected clock. Let today be the device local calendar date captured at rating commit. Store dates, not millisecond multiples of 24 hours; compare with the current device local date on subsequent launches. Log actual review timestamps separately. Changing device date/time zone may affect what is due; do not retroactively rewrite stored review dates.
+The approved interval ladder uses date-only values and an injected clock. Let today be the device local calendar date captured at rating commit. Store dates, not millisecond multiples of 24 hours; compare with the current device local date on subsequent launches. Log actual review timestamps separately. Changing device date/time zone may affect what is due; do not retroactively rewrite stored review dates.
 
 | Event | Transition | Next review |
 | --- | --- | --- |
@@ -115,10 +115,6 @@ A timer, if approved after MVP, is a study aid only. Expiry does not change sche
 4. Review: Home or Set detail -> Grade Mode -> reveal -> grade -> next -> summary.
 5. Switch: profile selector -> choose another profile -> new Home with empty/owned data.
 
-## 5. Decisions to approve and refine during clarification
+## 5. Approved MVP decisions
 
-- Adopt the proposed interval ladder versus a named SM-2/FSRS implementation.
-- Confirm grading is only for due/new cards; free learning covers any cards.
-- Confirm group deletion preserves sets, but set/profile/card deletion removes their owned history.
-- Confirm limits, image support priority, and session restart policy.
-- Confirm MVP scope against the three-week deadline. If an item must be cut, reduce P2/P3 before weakening isolation or persistence.
+The [specification clarifications of 2026-11-21](../specs/001-offline-flashcard-study/spec.md#session-2026-11-21) confirm the profile recovery flow (BR-01), field limits (BR-03/05), deletion effects (BR-04/06), interval ladder (BR-12) and interruption policy (BR-13). Each reviewed card’s Set Detail row shows its saved next date. Free Study covers every card in the set, and Graded Review admits new or due cards. All four stories are P1. Images remain P2. Defer optional work first if the three-week schedule comes under pressure.

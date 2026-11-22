@@ -1,6 +1,6 @@
 # Functional & Non-functional Requirements
 
-Version 1.1 — planning baseline. IDs in this document should be preserved or mapped in the generated Spec Kit specification.
+Version 1.1 — planning baseline. The P1 acceptance conditions incorporate the [specification clarifications of 2026-11-21](../specs/001-offline-flashcard-study/spec.md#session-2026-11-21). Preserve these IDs in feature plans and tasks.
 
 ## 1. Priority and actors
 
@@ -10,18 +10,18 @@ P1 = required MVP, P2 = desirable after stable core, P3 = optional. The original
 
 | ID | Priority | Requirement | Acceptance condition |
 | --- | --- | --- | --- |
-| FR-01 | P1 | Create, rename, select and delete local profiles. | First launch allows creation; selection persists; deleting a profile requires confirmation. If none remain, show profile creation. |
+| FR-01 | P1 | Create, rename, select and delete local profiles. | First launch allows creation; selection persists; deleting a profile requires confirmation. After deletion of the active profile or invalid selection, show creation with zero profiles and require explicit selection with any survivors, including one. |
 | FR-02 | P1 | Isolate libraries and review data by active profile. | Profile B cannot list, open, modify or review Profile A's cards, even from a stale navigation ID. Switching profiles resets library/session navigation. |
-| FR-03 | P1 | Create, rename, edit description of and delete groups. | Group name is required. Deleting a group moves its sets to Ungrouped; no cards or schedules are lost. |
+| FR-03 | P1 | Create, rename, edit description of and delete groups. | Group name is required. Group/set field limits and description normalization follow BR-03. Deleting a group moves its sets to Ungrouped; no cards or schedules are lost. |
 | FR-04 | P1 | Create, view, edit, delete and move flashcard sets within the current profile. | Set name is required, description optional. Sets can belong to zero or one group. Deletion requires confirmation and removes its cards/history. |
 | FR-05 | P1 | CRUD two-sided flashcards inside a set. | Front and back text are both required and non-blank. A saved card is visible in the same set after restart. |
 | FR-06 | P2 | Add, replace or remove an optional image on either side. | Card still needs valid front/back text; selected images remain readable offline after restart. Cancel/failure does not erase existing content. |
 | FR-07 | P1 | Non-Grade / Free Study mode. | All cards in a selected set are navigable; users can flip either side and move previous/next. No ratings, scores, review history or schedules are changed. |
 | FR-08 | P1 | Grade / Scheduled Review mode. | Only new or due cards are queued. A card starts front-side up; after reveal, Remembered (✓) or Forgot (✗) becomes available. Each card is scored at most once per session. |
-| FR-09 | P1 | Assign a next review date based on self-assessed recall. | A committed rating updates card schedule and review log atomically; due selection, missed review and failure behavior follow business rules. |
+| FR-09 | P1 | Assign a next review date based on self-assessed recall. | A committed rating updates card schedule and review log atomically; due selection, late review and failure behavior follow BR-10–BR-12. The approved ladder uses the local review day. Each reviewed card’s Set Detail row shows its saved next date. |
 | FR-10 | P1 | Display review availability. | Home shows due/new count for active profile; sets show their own eligible counts; empty queues show an actionable empty state. |
 | FR-11 | P1 | Show graded session summary. | Show number reviewed, remembered, forgot, and recall rate for committed ratings; unfinished cards remain eligible. A zero-review session has no percentage. |
-| FR-12 | P1 | Preserve committed data and handle interruptions. | Completed CRUD and grades survive restart. A lost unfinished session does not create fictitious ratings or lose submitted grades. |
+| FR-12 | P1 | Preserve committed data and handle interruptions. | Completed CRUD and grades survive restart. An interrupted session may restart with a fresh queue. Committed grades survive and unfinished cards receive no rating. |
 | FR-13 | P2 | Display profile learning coverage. | Coverage = currently existing cards with at least one committed review / all existing cards; zero cards display no data. Show as a fraction and percentage; do not call it mastery. |
 | FR-14 | P3 | Optional recall countdown. | If enabled later, expiry reveals a prompt or answer but never records Forgot automatically; a user rating is still required. |
 | FR-15 | P3 | Extended personalization. | Optional appearance choices such as theme or accent only after MVP; exact choices require approval. |

@@ -18,6 +18,14 @@ Use the expected results below to assess the implemented MVP.
    emulator and the current UI on the course device or an API 37 emulator. Log the actual
    Android version used for the demo.
 
+Use these phase checkpoints when recording evidence.
+
+| Phase | Required evidence |
+| --- | --- |
+| 1 · Setup (T001–T005) | Configure dependencies and test host, inspect classpaths, build and install the debug starter, confirm the device reports API 24 and launch MainActivity. Record the build and launch result. |
+| 2 · Foundation (T013, T019–T023) | Generate and inspect the v1 Room schema with KSP. Verify the concrete Application, AppContainer and ViewModel factory wiring and run the foundation suites. Story-specific ViewModel registrations follow their screens. |
+| 7 · Integration (T050) | On API 24, exercise the implemented calendar path at a known local date. For a late stage-1 Remembered on November 24, verify stage 2 and November 27 after reopen. Record the device/API and result separately from the presentation-runtime checks. |
+
 Run from the repository root. On Windows use `gradlew.bat` in place of `./gradlew`.
 
 ```sh
@@ -43,13 +51,16 @@ and injected failures belong in tests. [Room database testing](https://developer
 | Level and story | Exercise and expected result | Acceptance references |
 | --- | --- | --- |
 | JVM · US1 | Exercise Remembered at stages 0–6 and Forgot at every stage. Check all six intervals, the 60-day cap, tomorrow after Forgot, month/year rollover, leap day and a DST transition. A late stage-1 review saved on Nov 24 is due Nov 27. Changing zone changes the comparison date and leaves stored dates intact. Expect no percentage with zero reviews, 67% for two of three remembered and 50% for one of two. | FR-08, FR-09, FR-11 · NFR-06 · BR-11–BR-13 · SC-03, SC-04 |
-| JVM + editor UI · US3, US4 | Trim required fields. Check blank and whitespace-only values, 1/80/81 for group/set names, 0/500/501 for descriptions and 1/2,000/2,001 per card face. Accept duplicate card content and group/set names. Test Save/Cancel, named confirmation, discard confirmation and draft retention on failure. | FR-01, FR-03–FR-05 · NFR-03, NFR-08 · BR-01, BR-03, BR-05 · UI-01, UI-05, UI-07 · SC-01, SC-06 |
+| JVM + editor UI · US3, US4 | Trim required fields. Check blank and whitespace-only values, 1/80/81 for group/set names, and 1/2,000/2,001 per card face. For both group and set descriptions, save and reopen padded text with a trimmed length of 500, reject 501 after trimming, and clear an existing description with whitespace only. Expect trimmed text or null in storage. Accept duplicate card content and group/set names. Test Save/Cancel, named confirmation, discard confirmation and draft retention on failure. | FR-01, FR-03–FR-05 · NFR-03, NFR-08 · BR-01, BR-03, BR-05 · UI-01, UI-05, UI-07 · SC-01, SC-06 |
 | Room + selection persistence · US4 | Create A/B with identically named items. After switching, exercise stale IDs, pending observations and delayed A actions, including a grade. B gets zero A data or mutations. Reopen the database and preferences. Test valid selection, missing/deleted ID with one survivor, and zero profiles. While awaiting explicit selection, expect no active profile or visible library. Confirm profile deletion removes only owned content and reviews. | FR-01, FR-02, FR-10, FR-12 · NFR-02, NFR-07 · BR-01, BR-02, BR-06 · UI-01, UI-02, UI-11 · SC-01 |
+| Compose · Phase 3 US4 (T024) | Use empty storage for onboarding. For switching, seed A and B through Phase 2 repositories with identically named sets and different new/due counts. Select each profile, check its Home name and counts, then use Back in B and verify A’s Home/Profile cannot reopen. This provides partial SC-01 evidence. Phase 7 T049 exercises real stale Set Detail and review routes and a delayed grade. | FR-01, FR-02, FR-10, FR-12 · UI-01, UI-02, UI-11 · SC-01 |
+| Compose · Phase 4 US3 (T030) | Switch between two profiles with identically named sets and check the active display name on both Library tabs. For Library and Set Detail separately, seed a single reviewed card due tomorrow. Background the screen, advance the injected clock past local midnight and resume without writing to Room. Expect eligible count 0 → 1 and the original saved due date. | FR-02, FR-10 · NFR-03 · UI-03, UI-06 |
 | Room · US3 | Create, read, rename/edit, move and delete items. Reject mixed-owner relationships. Moving a set or editing a card preserves schedules and reviews. Group deletion leaves sets in Ungrouped. Set/card deletion removes exactly the corresponding descendants and reviews. Check both profiles and reopen the file. | FR-02–FR-05, FR-12 · NFR-02 · BR-03–BR-07 · UI-03–UI-07 · SC-01, SC-05 |
 | JVM + Room · US1 | Seed due, overdue, new, future and foreign cards in two sets with tied dates/creation times. Compare profile and set counts and queues. Reviewed eligible cards precede new cards, with ID tie-breaks. Snapshot excludes cards added later, skips deleted cards, excludes a just-forgotten card and respects date changes on foreground return. | FR-02, FR-08–FR-10 · BR-02, BR-10–BR-12 · UI-02, UI-06, UI-09 · SC-03 |
 | Room + ViewModel · US1 | Fail a real transaction after its first write using a test-only fault, then inspect both tables. Neither change may persist. Retry successfully and submit competing taps for the same session/card. In a separate case, commit a grade and suppress its acknowledgement. After reopening, retry the same session/card and expect the original grade and next date, one log and one schedule transition. Verify a save error keeps the current card, and a successful retry advances once. | FR-08, FR-09, FR-11, FR-12 · NFR-02, NFR-08 · BR-11–BR-13 · UI-09, UI-10 · SC-04 |
 | Compose + Room · US2 | Browse both sides of new, due and future cards in preview and Free Study. Verify default Front, reset on card change, position, repeat flips, stable order and previous/next boundaries for one and many cards. Compare history, stages, due dates and eligible counts before/after. | FR-07, FR-10 · BR-09 · UI-06, UI-08 · SC-02 |
-| Compose navigation · all four stories | Exercise onboarding, Home, Library tabs, groups, set sheets, editors, mode entry and Back/Done. Grade becomes available after first reveal and stays available if flipped back. Check empty, loading, saving, error/retry and cancel/confirm exit states. Rotate with a draft and during review. With a three-card snapshot, rate the first card and skip the deleted second card. Expect “3 of 3” and one reviewed on the third, then two reviewed after its grade. Check reveal state, summary, Set Detail date and navigation reset after profile switch. | FR-01–FR-05, FR-07–FR-12 · NFR-03–NFR-05, NFR-08 · BR-01–BR-07, BR-09–BR-13 · UI-01–UI-11 · SC-01–SC-06 |
+| Compose · Phase 6 US1 (T043) | Force review recomposition before a grade tap and during its pending save. Observe zero repository grade commands before the tap, exactly one through the pending recompositions, and exactly one advancement on commit. Separately request and confirm exit with a held save. The summary stays hidden while pending. A commit contributes once. A rollback leaves the card retryable and contributes zero on subsequent confirmed exit. | FR-09, FR-11, FR-12 · NFR-08 · UI-09, UI-10 · SC-04 |
+| Compose navigation · all four stories | Exercise onboarding, Home, Library tabs, groups, set sheets, editors, mode entry and Back/Done. Grade becomes available after first reveal and stays available if flipped back. Check empty, loading, saving, error/retry and cancel/confirm exit states. Rotate with a draft and during review. While the first card of a three-card snapshot is open, delete the second through the fixture. Rate the first and verify the second is skipped. Expect “3 of 3” and one reviewed on the third, then two reviewed after its grade. Check reveal state, summary, Set Detail date and navigation reset after profile switch. | FR-01–FR-05, FR-07–FR-12 · NFR-03–NFR-05, NFR-08 · BR-01–BR-07, BR-09–BR-13 · UI-01–UI-11 · SC-01–SC-06 |
 
 For NFR-06, also review the changed dependencies and confirm screen code has no direct DAO
 access. For NFR-07, inspect the merged manifest and backup settings for local-only handling of
@@ -91,16 +102,10 @@ adb shell am start -n com.example.flashcardapp/.MainActivity
    adb shell am start -n com.example.flashcardapp/.MainActivity
    ```
 
-5. **Adaptive UI · SC-06.** Cover all four combinations of portrait/landscape and default (100%)/130% font scale. Use equivalent study data for each pass.
-   Rotate midway through editing the remaining card and check its draft survives. During
-   Graded Review rotate after revealing the answer and resize the app window where supported.
-   Position, face and enabled grade actions survive. Confirm labeled Flip, ✓ Remembered,
-   ✗ Forgot and Done are reachable by touch and accessible by name. Measure each touch target in both dimensions (minimum 48 × 48 dp).
-   Compare text with its actual background (minimum 4.5:1 for normal text, 3:1 for large
-   text as defined in NFR-04). Record results for each combination, including long-text
-   scrolling and whether each primary action fits and remains reachable.
-   Submit the final grade and check the empty review state. Compare Library, group, preview,
-   sheet and landscape review against REF-01–REF-07 and the approved design.
+5. **Adaptive UI · SC-06.** Run four independent passes in a separate disposable fixture, starting with an empty set each time. Use portrait at 100%, portrait at 130%, landscape at 100% and landscape at 130%. Keep each setting for the entire pass.
+   - Create and save a two-sided card with long text. Start Graded Review from that set, flip the card and identify both ✗ Forgot and ✓ Remembered by label and symbol. Submit one grade, verify one committed review on the summary and tap Done. Verify return to the originating set and its empty review workload.
+   - Record the full journey for each setting. Check accessible names, gesture alternatives, scrolling, clipping and reachability. Measure touch targets in both dimensions (minimum 48 × 48 dp) and text contrast on actual surfaces (4.5:1 normal, 3:1 large as defined in NFR-04).
+   - Separately, return to profile A from step 4. Rotate while editing its remaining card and verify the draft survives. Rotate after reveal during review and resize where supported. Verify position, face and enabled actions survive, submit the last grade and check the empty review state. Compare Library, group, preview, sheet and landscape review against REF-01–REF-07.
    [UI description and reference index](../../docs/6-ui-design/ui-description.md)
 6. **Deletion · SC-05 and SC-01.** Cancel group deletion once, then confirm it and verify
    the set appears in Ungrouped with all three cards and dates intact. Confirm set deletion

@@ -154,13 +154,13 @@ Deferred identifiers are mapped separately below.
 | FR-07 | Free Study browses every card in one set in ascending creation order, breaking ties by ID. Preview and Free Study are read-only for all learning data. | BR-09 | 2 |
 | FR-08 | Start Graded Review from Home or Set Detail. Take a snapshot with reviewed cards due today or earlier first (earliest date, then ID), then new cards (creation time, then ID). Require answer reveal and explicit self-rating. | BR-10, BR-11 | 1 |
 | FR-09 | A successful rating records exactly one review per session/card and updates its stage and next date together. Rollback leaves all learning data unchanged. A retry after a lost acknowledgement returns the original committed result without another rating or schedule update. Block further submissions while saving. Advance only on success. Display the saved next review date in the card’s row on Set Detail. | BR-11, BR-12 | 1 |
-| FR-10 | Home shows active-profile counts of new and due reviewed cards and Review now. Show total and eligible counts for each set. Refresh counts after changes and date rollover on return. Do not start an empty session. | BR-02, BR-10 | 1, 4 |
+| FR-10 | Home shows active-profile counts of new and due reviewed cards and Review now. Show total and eligible counts for each set. Refresh Home, Library and Set Detail counts on foreground return when the local date changes, even without a database write, and refresh after data changes. Do not start an empty session. | BR-02, BR-10 | 1, 4 |
 | FR-11 | At completion or confirmed early exit, show reviewed, remembered and forgot counts. Recall rate is remembered divided by reviewed, rounded to a whole percentage. Omit the percentage at zero reviews. Done returns to Home or the originating set. | BR-13 | 1 |
 | FR-12 | Confirmed edits, deletions, active selection and grades survive restart. After interruption, a fresh queue may be built from saved grades and current eligibility. Unfinished cards gain no rating from interruption. Warn before ending a review with unreviewed cards. Preserve committed data on save failure. | BR-01, BR-11, BR-13 | 1, 3, 4 |
 
 **Field limits (BR-03, BR-05).** After trimming, group and set names accept 1–80
-characters and each card face accepts 1–2,000. Group/set descriptions are optional and accept
-up to 500 characters. At the stated limit Save is available for an otherwise valid form.
+characters and each card face accepts 1–2,000. Trim leading and trailing whitespace from optional group/set descriptions before validation and saving.
+A blank result is absent. Accept up to 500 characters in the trimmed value. At the stated limit Save is available for an otherwise valid form.
 Exceeding it identifies the field and prevents saving. The source gives no numeric profile-name
 limit.
 
@@ -202,7 +202,7 @@ the browsing destinations. Hide that navigation during focused study.
 | Screen | What the learner sees and can do | Visual basis |
 | --- | --- | --- |
 | UI-01, UI-02, UI-11 | Restore a valid selection. If the active profile was deleted or the saved selection is invalid, show profile creation when empty or the selector otherwise. Open Home after explicit selection in this recovery flow. Home shows the review workload, Review now and a Library shortcut. Profile shows the active learner, switching, renaming and confirmed deletion. | UI Description §§3, 12 |
-| UI-03 | Library initially opens Study Sets. Show all owned sets, grouped and ungrouped, in stable order. Groups tab shows owned groups and counts. A prominent add action opens creation. | [REF-01](../../docs/6-ui-design/references/startup_ui.png), [REF-02](../../docs/6-ui-design/references/outside_group_ui.png) |
+| UI-03 | Library shows the active profile’s display name and initially opens Study Sets. Show all owned sets, grouped and ungrouped, in stable order. Groups tab shows owned groups and counts. A prominent add action opens creation. | [REF-01](../../docs/6-ui-design/references/startup_ui.png), [REF-02](../../docs/6-ui-design/references/outside_group_ui.png) |
 | UI-04 | Show group title, count, optional description and its sets. The primary action adds a set. Overflow provides group editing and confirmed deletion. | [REF-03](../../docs/6-ui-design/references/inside_group_ui.png) |
 | UI-05, UI-07 | Editors show labeled fields, Save/Cancel, inline errors and scrolling. Successful save returns to the parent screen. Warn before discarding a changed draft. | UI Description §9 |
 | UI-06 | Browse and flip the large preview, with a position indicator. Show set details, total and eligible counts, Free Study, Grade Mode, the card list and Add card. Each reviewed card’s row shows its next review date. The dark bottom sheet offers Edit, Move to group, Delete and dismissal. | [REF-04](../../docs/6-ui-design/references/flashcard_front.png), [REF-05](../../docs/6-ui-design/references/flashcard_end.png), [REF-06](../../docs/6-ui-design/references/edit_a_set.png) |

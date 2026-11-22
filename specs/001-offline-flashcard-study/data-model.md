@@ -31,9 +31,10 @@ parent key for a composite reference and allows the reference when groupId is nu
 ### Validation and mutations
 
 - Trim profile names, group/set names and card faces before validation and saving. Require a
-  nonblank profile name, 1–80 characters per group/set name, up to 500 per optional description
-  and 1–2,000 per face. Use the same validation for UI feedback and repository writes. Invalid
-  input leaves the saved record intact (BR-01, BR-03, BR-05).
+  nonblank profile name, 1–80 characters per group/set name and 1–2,000 per face.
+  Trim leading and trailing whitespace from `StudyGroup.description` and `StudySet.description` before
+  validation and persistence. Store blank as null and allow up to 500 characters in the trimmed value.
+  Use the same validation for UI feedback and repository writes. Invalid input leaves the saved record intact (BR-01, BR-03, BR-05).
 - Create a card with stage 0 and no date. Only grading can change the stage (0 through 6) or
   schedule. An edit updates only editable columns. Moving a set updates only groupId after a
   same-owner lookup. No operation reassigns a card or set to another profile (BR-02, BR-07).
@@ -109,7 +110,7 @@ zone. Remembered increases the stage by one up to 6, with offsets of 1, 3, 7, 14
 calendar days for resulting stages 1–6. Forgot from any stage resets to 0 and schedules tomorrow.
 Add days to the actual review date even when overdue. A forgotten card has a saved dueDay, so
 stage 0 alone never identifies a new card. Recompute today on launch, session start and return
-to the foreground. Date/zone changes affect comparisons only. See the exact transition table
+to the foreground. Use the refreshed local day for Home, Library rows and the open Set Detail count even when Room has emitted no changes. Date/zone changes affect comparisons only. See the exact transition table
 in [FR-09 and BR-12](spec.md#functional-requirements) and the
 [LocalDate reference](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html).
 

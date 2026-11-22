@@ -15,7 +15,7 @@ AGP 9.3's Gradle and Build Tools requirements are compatible with the wrapper an
 
 ### Minimal catalog additions for implementation
 
-These are selected coordinates for Phase 1. Preserve existing catalog aliases. Verify the resolved classpaths, compiler processing, schema export and starter build before layering features on top. A full build of these future additions has not been run.
+These are selected coordinates for Phase 1. Preserve existing catalog aliases. Verify resolved classpaths, test setup, starter build and API 24 starter launch in Phase 1. Verify Room compiler output and the exported schema against the five entities in Phase 2. A full build of these future additions has not been run.
 
 | Addition | Planned pin and use | Alternative considered |
 | --- | --- | --- |
@@ -41,9 +41,9 @@ These are selected coordinates for Phase 1. Preserve existing catalog aliases. V
 ## Reference discrepancies and disposition
 
 - UI Description spells the folder `06-ui-design`. The actual directory is [docs/6-ui-design](../../docs/6-ui-design/). All seven filenames in the reference index exist there.
-- Earlier documents label the ladder and deletion rules as proposed. The five decisions in the specification's dated Clarifications section are approved. That section also settles the invalid-selection fallback and next-date placement. The original checklist notes describe the earlier draft.
+- The [2026-11-21 clarifications](spec.md#session-2026-11-21) approve the profile fallback, intervals, field limits, deletion and interruption behavior, and Set Detail date placement. The business rules and technical baseline reflect those decisions.
 - The overview's optional Week 2 images and controls pictured in the commercial app do not enter this plan. The scope is all four P1 stories. Basic rotation and resizing are mandatory. Enhanced large-screen layouts remain deferred.
 - The starter's theme follows system appearance and enables dynamic color. Apply the documented dark palette by default during the UI setup. The existing greeting and example tests are scaffolding.
 - Spec Kit reports `001-offline-flashcard-study` as the feature identifier from the active feature configuration. Git reports the checkout branch as `main`.
 
-The minimum runtime and technical choices are settled for planning. Phase 1 will verify resolved dependencies and the minimum-runtime smoke test. The API 33 WayDroid target can support development tests. Confirm the actual presentation device before the demo.
+The minimum runtime and technical choices are settled for planning. Phase 1 verifies resolved dependencies, test setup, the starter build and an API 24 starter launch. Phase 2 generates the Room schema and wires the concrete Application, AppContainer and ViewModel factory. Phase 7 exercises calendar arithmetic on API 24. The API 33 WayDroid target can support development tests. Confirm the actual presentation device before the demo.

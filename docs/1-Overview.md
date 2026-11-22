@@ -55,10 +55,10 @@ Online accounts, authentication, cloud synchronization, sharing marketplace, bac
 
 ## 6. Success indicators
 
-The demo can create two profiles with separate libraries, create at least one group/set and cards, study without grades, grade due cards, see next review dates, restart the app, and confirm that prior data survives in airplane mode. Build and relevant tests pass. Detailed requirements and acceptance criteria are in [requirements](2-%20Functional%20Requirements.md).
+The demo can create two profiles with separate libraries, create at least one group/set and cards, study without grades, grade due cards, see next review dates, restart the app, and confirm that prior data survives in airplane mode. Build and relevant tests pass. Detailed requirements and acceptance criteria are in [requirements](2-Functional%20Requirements.md).
 
 ## 7. References and document status
 
 - [Quizlet](https://quizlet.com/) and [Anki](https://apps.ankiweb.net/): product inspiration.
 - [Android Basics with Compose](https://developer.android.com/courses/android-basics-compose/course): course material and learning foundation.
-- This file records product intent. The companion documents propose a coherent initial baseline; confirm open decisions before implementation. Spec Kit will create the formal feature specification, technical plan and tasks. Do not treat this document as generated code instructions.
+- This file records product intent. The [specification clarifications of 2026-11-21](../specs/001-offline-flashcard-study/spec.md#session-2026-11-21) record the approved profile, field, deletion, scheduling and interruption decisions for the MVP. Do not treat this document as generated code instructions.
