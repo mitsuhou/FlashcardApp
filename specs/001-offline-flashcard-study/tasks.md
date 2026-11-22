@@ -6,11 +6,13 @@ Paths are relative to the repository root. Complete phases in order. Within each
 
 ## Phase 1 — Project setup and shared configuration
 
-- [ ] T001 Add the research-selected Navigation, Lifecycle Compose, Room runtime/compiler and schema plugin, KSP2, Preferences DataStore, coroutines Android/test and desugaring aliases in `gradle/libs.versions.toml`. Each addition must map to the library and version in [research.md](research.md#minimal-catalog-additions-for-implementation).
-- [ ] T002 Apply the aliases in `build.gradle.kts` and `app/build.gradle.kts`, configure Room schema export to `app/schemas/`, Compose test hosting and java.time desugaring. Preserve the existing Compose BOM, single module, minSdk 24, compile/target 37, Java 11 bytecode and Gradle daemon JDK 25.
-- [ ] T003 [P] Configure `app/src/main/AndroidManifest.xml`, `app/src/main/res/xml/backup_rules.xml` and `app/src/main/res/xml/data_extraction_rules.xml` to keep Room and DataStore data out of legacy backups, cloud backup and device transfer. Inspect the merged release manifest for unnecessary network/storage permissions (NFR-01, NFR-07).
-- [ ] T004 [P] Apply the approved dark Material 3 palette in `app/src/main/java/com/example/flashcardapp/ui/theme/Color.kt` and `app/src/main/java/com/example/flashcardapp/ui/theme/Theme.kt`. Check the NFR-04 color pairs in the theme, including both grading actions. Measure the rendered controls in T048 (CHK016).
-- [ ] T005 Use `gradlew` and `specs/001-offline-flashcard-study/quickstart.md` to inspect resolved debug, test and KSP dependencies, build the debug APK, and install and launch the starter on API 24. Record resolved toolchain, API and build result in the quickstart. Verify actual schema generation when v1 exists in T013 (NFR-06, NFR-09).
+- [X] T001 Add the research-selected Navigation, Lifecycle Compose, Room runtime/compiler and schema plugin, KSP2, Preferences DataStore, coroutines Android/test and desugaring aliases in `gradle/libs.versions.toml`. Each addition must map to the library and version in [research.md](research.md#minimal-catalog-additions-for-implementation).
+- [X] T002 Apply the aliases in `build.gradle.kts` and `app/build.gradle.kts`, configure Room schema export to `app/schemas/`, Compose test hosting and java.time desugaring. Preserve the existing Compose BOM, single module, minSdk 24, compile/target 37, Java 11 bytecode and Gradle daemon JDK 25.
+- [X] T003 [P] Configure `app/src/main/AndroidManifest.xml`, `app/src/main/res/xml/backup_rules.xml` and `app/src/main/res/xml/data_extraction_rules.xml` to keep Room and DataStore data out of legacy backups, cloud backup and device transfer. Inspect the merged release manifest for unnecessary network/storage permissions (NFR-01, NFR-07).
+- [X] T004 [P] Apply the approved dark Material 3 palette in `app/src/main/java/com/example/flashcardapp/ui/theme/Color.kt` and `app/src/main/java/com/example/flashcardapp/ui/theme/Theme.kt`. Check the NFR-04 color pairs in the theme, including both grading actions. Measure the rendered controls in T048 (CHK016).
+- [X] T005 Use `gradlew` and `specs/001-offline-flashcard-study/quickstart.md` to inspect resolved debug, test and KSP dependencies, build the debug APK, and install and launch the starter on API 24. Record resolved toolchain, API and build result in the quickstart. Verify actual schema generation when v1 exists in T013 (NFR-06, NFR-09).
+
+**Checkpoint passed · 2026-11-22.** The resolved classpaths, release manifest and palette passed inspection. Both starter tests passed, and MainActivity launched on API 24. [Phase 1 verification](quickstart.md#phase-1-verification)
 
 ## Phase 2 — Database, repositories and shared foundations
 

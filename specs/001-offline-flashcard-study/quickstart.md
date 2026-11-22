@@ -1,8 +1,21 @@
 # Quickstart — FlashcardApp P1 validation
 
 Use this guide as each feature becomes available and run the full sequence before the demo.
-At planning time the repository contains the Android starter activity and example tests.
-Use the expected results below to assess the implemented MVP.
+
+## Phase 1 verification
+
+**Passed on 2026-11-22 (T001–T005).** The debug starter and instrumentation APK built with Gradle 9.5.0, daemon JDK 25.0.2, AGP 9.3.3, the Kotlin Compose plugin 2.2.10 and Java 11 bytecode. The app uses minSdk 24 and compile/target SDK 37.
+
+| Check | Observed result |
+| --- | --- |
+| Dependencies | Inspected debug, JVM-test, instrumentation-test, KSP processor and desugaring classpaths with `:app:dependencies`. Navigation Compose 2.10.2, Lifecycle Compose 2.11.0, Room runtime/compiler 2.8.5, KSP 2.3.14, DataStore Preferences 1.3.0, coroutines Android/test 1.10.2 and desugaring 2.1.5 resolved. The final report had zero failed entries. |
+| Compose and Room setup | Compose BOM 2026.02.01 applies to the app, debug tooling and instrumentation. The debug test host and Compose UI test library resolved to 1.11.2. KSP ran, and Room’s schema copy reported `NO-SOURCE`. T013 verifies the first generated schema when the database exists. |
+| Release privacy | The merged release manifest sets `allowBackup=false` and references both rule files. Legacy backup, cloud backup and device transfer each exclude the database domain and the `files/datastore` directory. Its sole requested permission was the app-private dynamic-receiver permission. |
+| Dark theme | Foreground/background contrast measured 5.87:1 for white on indigo, 17.34:1 for primary text on navy, and 10.41:1, 6.65:1 and 4.52:1 for primary, secondary and muted text on the card surface. Remembered and Forgot on the grade-action surface measured 5.60:1 and 6.78:1. All exceed 4.5:1. T048 measures the rendered controls. |
+| Build and tests | `:app:assembleDebug`, `:app:assembleDebugAndroidTest`, `:app:testDebugUnitTest` and `:app:processReleaseMainManifest` succeeded. One starter JVM test passed. The debug and test APKs installed on an AOSP x86_64 Android 7.0 emulator (API 24, image revision 8), and the starter instrumentation test passed (1/1). |
+| Starter launch | ADB reported API 24. Launching `com.example.flashcardapp/.MainActivity` with `am start -W` returned `Status: ok`. A subsequent `dumpsys activity activities` check showed MainActivity resumed. |
+
+After verification, the temporary API 24 emulator shut down. Its virtual device directory, extracted system image and downloaded archive were removed.
 
 ## Prepare and build
 
