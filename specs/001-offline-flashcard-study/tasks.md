@@ -97,6 +97,7 @@ Setup → shared data foundation → US4 → US3 → US2 → US1 → integrated 
 - US4 can draft T024 and T025 together against the approved profile behavior. US3 can draft T030 and T031 together against seeded owned content.
 - US2 can draft T038 and T039 together against the read-only projection. US1 can draft T042 and T043 together against the grading repository and UI contract. Integrate shared navigation and factory files in task order.
 - Run each story’s tests at its checkpoint. A story is independently demonstrable using its stated fixture. The MVP release requires **all four**.
+- After each implementation phase, update the task checkboxes here first. Refresh [current.md](current.md) from those checkboxes with the date, phase, completed and pending IDs, verification results, blockers and next actions.
 
 ## Acceptance and scope index
 
