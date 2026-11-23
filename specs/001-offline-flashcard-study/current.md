@@ -1,11 +1,11 @@
 # FlashcardApp MVP status
 
-**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **14 of 51 tasks complete** (T001–T014). T015–T051 await approval or implementation. [Implementation tasks](tasks.md)
+**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **15 of 51 tasks complete** (T001–T015). T016–T051 await approval or implementation. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
-| 2 · Database, repositories and shared foundations | T015–T023 |
+| 2 · Database, repositories and shared foundations | T016–T023 |
 | 3 · US4 Local Profiles | T024–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
@@ -30,4 +30,6 @@
 
 **T014 approved.** All 15 debug JVM tests passed. A separate JVM check with a test double for ProfileDao verified the list flow, trimmed names, blank-name rejection, distinct generated IDs for matching names, and rename and delete by ID. Both operations reported a missing ID.
 
-**Current task.** T015 (persist and validate the selected profile ID) is implemented and awaiting review. All 15 debug JVM tests passed. A separate JVM check with DAO and DataStore test doubles verified restoration, retry after read and write failures, and an absent selection with zero or one remaining profile. Deleting A preserved a newer selection of B. When preference cleanup failed, observers and a new repository both treated the deleted ID as unselected. File-backed integration tests are scheduled for T021.
+**T015 approved.** All 15 debug JVM tests passed. A separate JVM check with DAO and DataStore test doubles verified restoration, retry after read and write failures, and an absent selection with zero or one remaining profile. Deleting A preserved a newer selection of B. When preference cleanup failed, observers and a new repository both treated the deleted ID as unselected. File-backed integration tests are scheduled for T021.
+
+**Current task.** T016 (profile-scoped library repository) is implemented and awaiting review. All 15 debug JVM tests passed. A separate JVM check with a DAO test double verified field validation, normalization, scoped write arguments and affected-row handling. Room generated the group deletion transaction. In-memory SQLite checks using the v1 schema and DAO queries verified scoped counts, read-only card order, preservation of schedules and history after edits and moves, and rollback when group deletion failed after detachment. Device-level Room integration tests are scheduled for T020.

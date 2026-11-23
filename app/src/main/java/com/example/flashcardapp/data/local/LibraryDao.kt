@@ -3,6 +3,7 @@ package com.example.flashcardapp.data.local
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 data class GroupWithCount(val id: Long, val name: String, val setCount: Int)
@@ -14,6 +15,8 @@ data class SetWithCounts(
     val cardCount: Int,
     val eligibleCount: Int
 )
+
+data class LibraryCard(val id: Long, val front: String, val back: String, val dueDay: Long?)
 
 @Dao
 interface LibraryDao {
@@ -42,26 +45,33 @@ interface LibraryDao {
     @Query("UPDATE study_sets SET groupId = NULL WHERE ownerId = :profileId AND groupId = :groupId")
     suspend fun detachSetsFromGroup(profileId: Long, groupId: Long): Int
 
-    @Query("""
-        DELETE FROM study_groups
-        WHERE ownerId = :profileId AND id = :groupId
-          AND NOT EXISTS (
-              SELECT 1 FROM study_sets WHERE ownerId = :profileId AND groupId = :groupId
-          )
-    """)
-    suspend fun deleteEmptyGroup(profileId: Long, groupId: Long): Int
+    @Query("DELETE FROM study_groups WHERE ownerId = :profileId AND id = :groupId")
+    suspend fun deleteGroupRow(profileId: Long, groupId: Long): Int
 
-    // A null group filter shows the entire library, including ungrouped sets.
+    @Transaction
+    suspend fun deleteGroup(profileId: Long, groupId: Long): Boolean {
+        val detached = detachSetsFromGroup(profileId, groupId)
+        val deleted = deleteGroupRow(profileId, groupId) == 1
+        check(deleted || detached == 0) { "Could not delete the group after detaching its sets." }
+        return deleted
+    }
+
+    // With allGroups disabled, IS matches a specific group or NULL for Ungrouped.
     @Query("""
         SELECT s.id, s.name, s.groupId, COUNT(c.id) AS cardCount,
                COUNT(CASE WHEN c.dueDay IS NULL OR c.dueDay <= :today THEN c.id END) AS eligibleCount
         FROM study_sets AS s
         LEFT JOIN flashcards AS c ON c.setId = s.id
-        WHERE s.ownerId = :profileId AND (:groupId IS NULL OR s.groupId = :groupId)
+        WHERE s.ownerId = :profileId AND (:allGroups OR s.groupId IS :groupId)
         GROUP BY s.id
         ORDER BY s.name, s.id
     """)
-    fun observeSets(profileId: Long, today: Long, groupId: Long? = null): Flow<List<SetWithCounts>>
+    fun observeSets(
+        profileId: Long,
+        today: Long,
+        groupId: Long? = null,
+        allGroups: Boolean = groupId == null
+    ): Flow<List<SetWithCounts>>
 
     @Query("SELECT * FROM study_sets WHERE ownerId = :profileId AND id = :setId")
     fun observeSet(profileId: Long, setId: Long): Flow<StudySet?>
@@ -88,19 +98,19 @@ interface LibraryDao {
     suspend fun deleteSet(profileId: Long, setId: Long): Int
 
     @Query("""
-        SELECT c.* FROM flashcards AS c
+        SELECT c.id, c.front, c.back, c.dueDay FROM flashcards AS c
         JOIN study_sets AS s ON s.id = c.setId
         WHERE s.ownerId = :profileId AND s.id = :setId
         ORDER BY c.createdAt, c.id
     """)
-    fun observeCards(profileId: Long, setId: Long): Flow<List<Flashcard>>
+    fun observeCards(profileId: Long, setId: Long): Flow<List<LibraryCard>>
 
     @Query("""
-        SELECT c.* FROM flashcards AS c
+        SELECT c.id, c.front, c.back, c.dueDay FROM flashcards AS c
         JOIN study_sets AS s ON s.id = c.setId
         WHERE s.ownerId = :profileId AND s.id = :setId AND c.id = :cardId
     """)
-    fun observeCard(profileId: Long, setId: Long, cardId: Long): Flow<Flashcard?>
+    fun observeCard(profileId: Long, setId: Long, cardId: Long): Flow<LibraryCard?>
 
     // setId is required. If the lookup finds no owned set, SQLite rejects the insert.
     @Query("""
