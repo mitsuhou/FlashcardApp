@@ -1,11 +1,11 @@
 # FlashcardApp MVP status
 
-**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **9 of 51 tasks complete** (T001–T009). T010–T051 await approval or implementation. [Implementation tasks](tasks.md)
+**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **10 of 51 tasks complete** (T001–T010). T011–T051 await approval or implementation. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
-| 2 · Database, repositories and shared foundations | T010–T023 |
+| 2 · Database, repositories and shared foundations | T011–T023 |
 | 3 · US4 Local Profiles | T024–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
@@ -20,4 +20,6 @@
 
 **T009 approved.** Both Room entities compiled and all 15 debug JVM tests passed. The compiled foreign keys and indexes match the design. An in-memory SQLite check of the equivalent constraints accepted an ungrouped set, rejected a cross-profile link and verified group detachment and profile cascades.
 
-**Current task.** T010 is awaiting review of the revised entities. The card holds its current stage and due day. Each log records the session ID, card ID, grade and review timestamp. All 15 debug JVM tests passed. The compiled log fields and Room key annotations were checked. Equivalent SQLite constraints rejected a duplicate session/card, allowed the same card in another session and cascaded deletion only to that card’s logs. Work is paused at T010.
+**T010 approved.** The card holds its current stage and due day. Each log records the session ID, card ID, grade and review timestamp. All 15 debug JVM tests passed. The compiled log fields and Room key annotations were checked. Equivalent SQLite constraints rejected a duplicate session/card, allowed the same card in another session and cascaded deletion only to that card’s logs.
+
+**Current task.** T011 (profile and library DAOs) is implemented and awaiting review. All 15 debug JVM tests passed. Room compiled both DAOs in an isolated fixture. SQLite checks on its generated schema covered ownership, empty counts, card order and preservation of schedules on text edits. After review, group and set creation use Room-generated inserts. The revised empty-group delete returned zero for nonempty, foreign and missing groups, and one for an owned empty group. Detaching a set preserved its owner.
