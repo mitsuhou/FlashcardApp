@@ -17,6 +17,12 @@ Use this guide as each feature becomes available and run the full sequence befor
 
 After verification, the temporary API 24 emulator shut down. Its virtual device directory, extracted system image and downloaded archive were removed.
 
+## T013 database verification
+
+On 2026-11-23, `./gradlew --offline :app:assembleDebug :app:testDebugUnitTest` built the debug APK and all 15 JVM tests passed. KSP generated the database and all three DAO implementations. The [exported v1 schema](../../app/schemas/com.example.flashcardapp.data.local.FlashcardDatabase/1.json) matches the approved five tables, keys, indexes, nullability and defaults.
+
+A host SQLite check using the exported SQL rejected a cross-profile group link and a duplicate session/card grade. Reopening the test file preserved its card and review. The database builder uses Room's default migration policy. This first schema establishes the baseline for future migration tests.
+
 ## Prepare and build
 
 1. Open the repository root (the directory containing `settings.gradle.kts`, `gradlew` and
