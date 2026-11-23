@@ -39,7 +39,7 @@ Remembered increases the stage up to 6; Forgot resets stage to 0 and schedules t
 | Settings | Preferences DataStore for active-profile ID or simple equivalent; Room is the source of truth for profile existence |
 | Images (P2) | Android Photo Picker/appropriate fallback + app-private files; no upload |
 | Tests | JUnit, kotlinx-coroutines-test, Room/repository integration tests, Compose UI and navigation tests |
-| Min SDK | Keep Android Studio configuration; API 26 is a reasonable proposal, confirm course/device constraints |
+| Min SDK | API 24 with core library desugaring for calendar arithmetic. The starter launch is recorded in the [Phase 1 evidence](../specs/001-offline-flashcard-study/quickstart.md#phase-1-verification). |
 
 Pin compatible versions in the actual project, not this document. Do not add Retrofit, Kotlinx Serialization for networking, Hilt, Firebase, a remote backend or network permissions solely for hypothetical future use. Reassess if a future approved feature needs them.
 
@@ -57,10 +57,10 @@ flowchart TD
     R --> F[Private image storage]
 ```
 
-- Manual dependency injection via Application-level AppContainer and ViewModel factory (compatible with course content). Use constructor injection for test doubles and a controllable clock.
+- Manual dependency injection via Application-level AppContainer and ViewModel factory (compatible with course content). Follow the Inventory and Mars Photos samples. Inject DAOs directly into repositories. Use Flow for observations and suspend functions for one-time operations.
 - State hoisting for reusable presentational composables. Use lifecycle-aware state collection and preserve necessary UI state during rotation.
-- Repository validates active profile/ownership for every relevant read and write. Do not rely on UI filtering for isolation.
-- Transaction for recording a graded review and updating its due date; unique session/card key or equivalent durable idempotency protection.
+- The repository and DAO check ownership using the profileId captured when the operation starts. On a switch the UI clears the previous stack and cancels its observations.
+- Use one Room transaction for the grade and schedule, and the (sessionId, cardId) primary key to prevent duplicate updates.
 - No use of destructive migration fallback for releases containing real user data. Establish migrations when schema changes.
 
 ## 4. Conceptual data model
@@ -71,13 +71,13 @@ flowchart TD
 | Group | ID, owner profile, name, optional description |
 | FlashcardSet | ID, owner profile, optional group, name, optional description |
 | Flashcard | ID, parent set, front/back text, optional image references, created timestamp, stage, nullable review due date |
-| ReviewLog | ID, card ID, session ID, grade, timestamp, previous/new stage and next review date |
+| ReviewLog | Composite primary key (session ID, card ID), grade, timestamp, previous/new stage and next review date |
 
 Every child relationship must resolve to the same owner. Formal schema and ownership enforcement belong in the generated data model. Use a date-only representation for due dates and an instant for review logs; specify the time-zone policy in the plan.
 
 ## 5. Verification strategy
 
-- Pure unit tests for every stage transition, cap, forgetting, due/overdue rules and date boundaries with an injected clock.
+- Pure unit tests for every stage transition, cap, forgetting, due/overdue rules and date boundaries using explicit local dates.
 - Room tests for cross-profile access, foreign keys, group deletion, set/profile deletion, and atomic/idempotent grading.
 - Compose tests for front/back flip, rating gating, summary, validation and profile switching.
 - Manual offline/restart, rotation and resized window smoke tests.

@@ -1,13 +1,9 @@
 <!--
 Sync Impact Report
-Version change: unratified template → 1.0.0 (initial adoption)
-New principles: I. Offline operation; II. Maintainable Kotlin and Compose;
-III. MVVM, unidirectional data flow and repositories; IV. Profile isolation;
-V. Durable local writes; VI. Independently testable business rules;
-VII. Minimal dependencies and architecture; VIII. Traceable, approved scope.
-Added sections: Core Principles, Three-Week Delivery Scope, Verification, Governance.
-Removed sections: none.
-Deferred constitution items: none.
+1.0.0 → 2.0.0 on 2026-11-23. Principle IV now permits an operation already started
+for one profile to finish for that profile after a switch. Principles V–VII clarify
+grading, dates and course-level architecture. No sections added or removed.
+The existing five-table design and completed Phase 1 apply. No deferred amendments.
 -->
 
 # FlashcardApp Constitution
@@ -37,11 +33,12 @@ Room DAOs MUST stay within the data layer. A recomposition MUST never trigger a 
 
 ### IV. Profile isolation
 
-Each local profile owns a separate library and review history. Every repository operation on
-owned data MUST enforce active-profile ownership, including lookups by ID, counts, moves and
-grade submissions. Parent and child records MUST resolve to the same owner. Switching profiles
-MUST clear the previous navigation stack, session and displayed data. A stale route or delayed
-action from profile A MUST never reveal or modify A's data while profile B is active.
+Each owned read or write MUST use the profile ID selected when the operation starts.
+DAOs and repositories MUST verify ownership of the target and its parents, including for
+counts, moves and grades. An operation started for A MAY finish for A after a switch.
+It MUST never write to B or deliver A's content to B's screen. Switching profiles MUST
+clear the old navigation stack, drafts, session and displayed data and cancel old UI
+observations. New actions in B MUST use B's profile ID, including when opening an old route.
 
 ### V. Durable local writes
 
@@ -54,20 +51,24 @@ confirmation. Deleting a group MUST preserve its sets in Ungrouped, including ca
 A submitted grade MUST update the schedule and append the review log in one transaction.
 The data layer MUST enforce at most one grade per session and card across retries and concurrent
 taps. The screen MUST advance only after commit and keep the current card available for retry
-on failure. Ending a session MUST preserve committed grades and leave ungraded cards eligible.
+on failure. While saving, the UI MUST disable both ratings, Exit and system Back.
+Navigation MUST be available again after success or failure. Ending a session MUST preserve committed grades and leave ungraded cards eligible.
 
 ### VI. Independently testable business rules
 
 Scheduling, eligibility and session-summary calculations MUST be testable as ordinary Kotlin
-without Android, Compose or Room. Pass the local review date explicitly or inject a clock so
-tests can reproduce date boundaries. Free Study and previews MUST leave learning data unchanged.
+without Android, Compose or Room. Pass the local review date explicitly so tests can
+reproduce date boundaries. Free Study and previews MUST leave learning data unchanged.
 Graded Review MUST select only new or due cards and accept a learner's Remembered or Forgot
-rating only after the answer has been revealed. Summaries MUST count committed ratings only.
+rating only after the answer has been revealed. An empty eligible queue MUST leave the learner at the entry screen.
+Summaries MUST count committed ratings only. After process restart a fresh queue is sufficient.
 
 ### VII. Minimal dependencies and architecture
 
 The default architecture is one app module, one activity and manual constructor injection.
-Use the existing Android toolchain and the smallest design that satisfies the acceptance
+Use the Android Basics with Compose course as the primary reference. Prefer direct DAO
+constructor injection, Flow for observations, suspend functions for writes and standard
+ViewModel factories. Use the existing Android toolchain and the smallest design that satisfies the acceptance
 criteria. A proposed library, module or additional layer MUST identify the current requirement
 it serves and explain why the existing stack is insufficient. Future extensions alone cannot
 justify that cost within a three-week project.
@@ -121,4 +122,4 @@ the amendment date and version and bring affected specifications, plans, tasks a
 checks into agreement. Use a MAJOR increment for incompatible changes to principles, MINOR for
 new principles or materially expanded guidance, and PATCH for wording-only corrections.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-21 | **Last Amended**: 2026-11-21
+**Version**: 2.0.0 | **Ratified**: 2026-11-21 | **Last Amended**: 2026-11-23

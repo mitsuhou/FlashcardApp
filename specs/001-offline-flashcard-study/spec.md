@@ -2,7 +2,8 @@
 
 **Feature directory**: `specs/001-offline-flashcard-study`  
 **Created**: 2026-11-21  
-**Status**: Clarified for planning  
+**Status**: Approved MVP behavior, revised 2026-11-23
+
 **Input**: One three-week Android course MVP for a local learner to organize two-sided text cards,
 practice recall and review due material on a shared device. The entire journey works in airplane mode.
 
@@ -15,6 +16,12 @@ practice recall and review due material on a shared device. The entire journey w
 - Q: Which field lengths are valid? → A: Group and set names accept 1–80 characters, their optional descriptions up to 500, and each card face 1–2,000 after trimming.
 - Q: What survives deletion or interruption? → A: Deleting a group preserves its sets in Ungrouped. Deleting a profile, set or card removes the content and reviews it owns. An interrupted review may restart with a fresh queue. Saved grades survive and interruption never grades an outstanding card.
 - Q: Where can the learner find a card’s next review date? → A: In that card’s row in the Set Detail card list.
+
+### Session 2026-11-23
+
+- A started operation keeps its original profile ID. A switch clears the old screens and observations. The new profile sees only its own data and starts operations with its own ID.
+- Starting review refreshes counts and eligibility using the current local day. An empty queue stays on the entry screen.
+- While a grade is saving, Exit and system Back are unavailable. Navigation resumes on success or failure. After process restart, committed grades persist and the next review starts from current eligibility.
 
 ## User Scenarios & Testing
 
@@ -53,9 +60,13 @@ cards. Exercise both review entry points at a fixed local date. Covers FR-08 thr
 7. **Given** a frozen queue of three cards with the first rated, **when** the second is
    skipped, **then** the third shows “3 of 3” with one committed rating. Grading the third
    ends the session with two reviewed.
-8. **Given** a committed grade whose acknowledgement was lost, **when** the same session/card
-   is retried, **then** the learner receives the original grade and next date. The session
-   advances once, with one rating and one schedule update.
+8. **Given** a grade is saving, **when** the learner presses Exit or system Back, **then**
+   the card stays visible and no exit confirmation opens. After success, navigation is
+   available on the next card or summary. After rollback, the revealed card offers Retry
+   and the learner can request exit.
+9. **Given** Home or Set Detail with no eligible cards at review start, **when** the learner
+   requests review, **then** the entry screen shows that nothing is due and offers Library
+   or Free Study as appropriate. No session or summary opens.
 
 ### User Story 2 – Practice a whole set freely (P1)
 
@@ -108,10 +119,12 @@ different contents and due counts (FR-01, FR-02, FR-10, FR-12).
 1. **Given** first launch offline with zero profiles, **when** the learner creates and selects
    a named profile, **then** Home shows that active profile and an empty review workload.
    Renaming it and restarting restores the same selected workspace under its new name.
-2. **Given** profile A has a set open or a review in progress, **when** B becomes active,
-   **then** B lands on its own Home. Back, an old card identifier and a delayed grade from A
-   cannot reveal, edit, move, delete or grade A's content. B's lists and counts contain only
-   B's data. Switching back shows A's original records, including previously saved grades.
+2. **Given** a library operation has started for A, **when** the learner switches to B,
+   **then** B opens its own Home and Back cannot return to A. The old screen stops observing A.
+   The operation may finish against A. Its result never appears in B and its write never affects
+   B. A new action in B using A's item ID cannot read or change that item. On returning to A,
+   the learner sees A's saved records, including any write that finished for A.
+
 3. **Given** A is active and B is the only other profile, **when** A's deletion is confirmed,
    **then** A's groups, sets, cards and reviews disappear, B's survive, and the selector shows B.
    B's Home opens only when the learner selects B.
@@ -147,14 +160,14 @@ Deferred identifiers are mapped separately below.
 | ID | Required behavior | Business rules | Story |
 | --- | --- | --- | --- |
 | FR-01 | Create, rename, select and explicitly confirm deletion of local profiles. Trim display names and require a nonblank value. Restore a valid selection on launch. After active-profile deletion or an invalid selection, show the selector with no active profile until the learner explicitly selects one, even with one remaining profile. Open Home after that selection. Show profile creation when none remain. | BR-01, BR-06 | 4 |
-| FR-02 | Enforce active ownership on every library, editor, queue, count, schedule, history and grade operation. Clear old navigation, screen data and sessions on switch, including during loading. | BR-02 | 4 |
+| FR-02 | Check every owned operation against its originating profile ID. Switching clears the old stack, screen data, session and UI observations. Already-started work may finish for its original owner. New actions use the newly selected profile. | BR-02 | 4 |
 | FR-03 | Create, open, rename, describe and delete flat groups. Show the set count. Confirming removal moves every contained set to Ungrouped with cards and learning records intact. | BR-03, BR-04 | 3 |
 | FR-04 | Create, open, edit, move and delete owned sets. Each belongs to zero or one owned group. Confirmed set deletion removes its cards and reviews. Moving preserves them. | BR-03, BR-04, BR-06, BR-07 | 3 |
 | FR-05 | Create, view, edit and delete two-sided text cards within one set. Require both faces. Preserve schedule and history on edits. Confirm a card deletion and remove its reviews. | BR-05, BR-06, BR-07 | 3 |
 | FR-07 | Free Study browses every card in one set in ascending creation order, breaking ties by ID. Preview and Free Study are read-only for all learning data. | BR-09 | 2 |
 | FR-08 | Start Graded Review from Home or Set Detail. Take a snapshot with reviewed cards due today or earlier first (earliest date, then ID), then new cards (creation time, then ID). Require answer reveal and explicit self-rating. | BR-10, BR-11 | 1 |
-| FR-09 | A successful rating records exactly one review per session/card and updates its stage and next date together. Rollback leaves all learning data unchanged. A retry after a lost acknowledgement returns the original committed result without another rating or schedule update. Block further submissions while saving. Advance only on success. Display the saved next review date in the card’s row on Set Detail. | BR-11, BR-12 | 1 |
-| FR-10 | Home shows active-profile counts of new and due reviewed cards and Review now. Show total and eligible counts for each set. Refresh Home, Library and Set Detail counts on foreground return when the local date changes, even without a database write, and refresh after data changes. Do not start an empty session. | BR-02, BR-10 | 1, 4 |
+| FR-09 | A successful rating records exactly one review per session/card and updates its stage and next date together. Rollback leaves all learning data unchanged. Repeated or concurrent submissions for the same session/card leave one log and one schedule update. Disable grading, Exit and system Back while saving. Restore navigation on success or failure. Advance only on success. Display the saved next review date in the card’s row on Set Detail. | BR-11, BR-12 | 1 |
+| FR-10 | Home shows active-profile counts of new and due reviewed cards and Review now. Show total and eligible counts for each set. Refresh Home, Library and Set Detail counts on foreground return when the local date changes, even without a database write, and refresh after data changes. At review start, recompute counts and eligibility for the current local day. An empty queue leaves the learner on the entry screen. | BR-02, BR-10 | 1, 4 |
 | FR-11 | At completion or confirmed early exit, show reviewed, remembered and forgot counts. Recall rate is remembered divided by reviewed, rounded to a whole percentage. Omit the percentage at zero reviews. Done returns to Home or the originating set. | BR-13 | 1 |
 | FR-12 | Confirmed edits, deletions, active selection and grades survive restart. After interruption, a fresh queue may be built from saved grades and current eligibility. Unfinished cards gain no rating from interruption. Warn before ending a review with unreviewed cards. Preserve committed data on save failure. | BR-01, BR-11, BR-13 | 1, 3, 4 |
 
@@ -207,7 +220,7 @@ the browsing destinations. Hide that navigation during focused study.
 | UI-05, UI-07 | Editors show labeled fields, Save/Cancel, inline errors and scrolling. Successful save returns to the parent screen. Warn before discarding a changed draft. | UI Description §9 |
 | UI-06 | Browse and flip the large preview, with a position indicator. Show set details, total and eligible counts, Free Study, Grade Mode, the card list and Add card. Each reviewed card’s row shows its next review date. The dark bottom sheet offers Edit, Move to group, Delete and dismissal. | [REF-04](../../docs/6-ui-design/references/flashcard_front.png), [REF-05](../../docs/6-ui-design/references/flashcard_end.png), [REF-06](../../docs/6-ui-design/references/edit_a_set.png) |
 | UI-08 | Focus on a labeled card with position, flip, navigation and exit. Browsing to another card starts it on Front. | REF-04/05 card faces and UI Description §10 |
-| UI-09 | Show one large card, Flip, Exit, the original position out of the frozen queue size, and a separate committed-review count. Beneath the landscape card place ✗ Forgot, position and ✓ Remembered. Keep both labeled actions reachable in portrait. | [REF-07](../../docs/6-ui-design/references/grade_mode.png) |
+| UI-09 | While saving, disable both rating actions, Exit and system Back. Restore navigation when the save finishes. Show one large card, Flip, Exit, the original position out of the frozen queue size, and a separate committed-review count. Beneath the landscape card place ✗ Forgot, position and ✓ Remembered. Keep both labeled actions reachable in portrait. | [REF-07](../../docs/6-ui-design/references/grade_mode.png) |
 | UI-10 | Show the committed session totals, defined recall rate and Done. | UI Description §12 |
 
 ### Key Entities
@@ -229,16 +242,19 @@ the browsing destinations. Hide that navigation during focused study.
 
 - **SC-01.** In airplane mode from first launch, a learner creates two profiles, one group, one
   set and three cards in A. After restart, all three cards and both text faces remain in A.
-  B exposes zero of A's records through browsing, stale navigation or delayed actions.
+  B exposes zero of A's records through browsing or stale navigation. A write already started in A can affect only A, and its completion leaves B’s screen and data intact.
 - **SC-02.** In Free Study the learner can visit both faces of all three cards, including a
   future-due card. Comparing learning data before and after yields zero changes.
 - **SC-03.** At known dates, every row of the scheduling table produces the specified stage
   and date, including a repeat at the cap and a late review. Set Detail shows that date in the
   reviewed card’s row. A mixed queue contains 100% of
-  eligible cards in the documented order and zero future or foreign cards.
+  eligible cards in the documented order and zero future or foreign cards. If no cards are
+  eligible at either entry point, the learner stays on Home or Set Detail.
 - **SC-04.** In a three-card review with one rolled-back grade, one retry and a duplicate tap,
   saving one Remembered and one Forgot before exit produces exactly two records, 50% recall
-  and one outstanding card after restart. Exiting before any grade shows no percentage.
+  and one outstanding card after restart. During a save, Exit and system Back keep the card
+  on screen. Navigation works again after both commit and rollback. Exiting before any grade
+  in a started session shows no percentage.
 - **SC-05.** After group deletion, all former sets, cards and schedules survive in Ungrouped.
   After confirmed set deletion, zero of its cards or reviews remain. Other sets retain theirs.
 - **SC-06.** In portrait and landscape at both default (100%) and 130% font scale, a learner can create a
@@ -261,8 +277,8 @@ the browsing destinations. Hide that navigation during focused study.
   this folder” becomes Add study set under UI Description §6. Classes, ads, search/filter,
   sharing, downloads, hints, audio, shuffle and undo have no P1 acceptance criteria.
 
-The technical baseline leaves the minimum Android version open. Planning must check the
-course demo device before choosing it. Offline operation has no external service dependency.
+The minimum supported Android version is API 24. The starter launch on API 24 is recorded in
+[Phase 1 verification](quickstart.md#phase-1-verification). Record the presentation device at the final checkpoint. Offline operation has no external service dependency.
 
 ### Source documents
 

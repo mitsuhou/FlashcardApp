@@ -17,7 +17,7 @@ Version 1.1 — business rules. The P1 rules below incorporate the [specificatio
 | ID | Rule | Related |
 | --- | --- | --- |
 | BR-01 | Require a trimmed, nonblank display name. Restore a valid saved profile. After active-profile deletion or an invalid selection, show creation if no profiles remain. Otherwise show the selector, even for one survivor. Open Home only after explicit selection in this recovery flow. | FR-01 |
-| BR-02 | A profile's data is logically isolated; all data access checks ownership. Switching profiles clears previous navigation/session state. No password/security boundary is implied. | FR-02 |
+| BR-02 | Each owned operation uses the profileId selected when it starts. Check ownership in the repository and DAO. Switching clears the old stack, session and displayed data and cancels old UI observations. An in-flight operation may finish only for its original owner. | FR-02 |
 | BR-03 | Trim group/set names and require 1–80 characters. Trim leading and trailing whitespace from optional descriptions before validation and persistence. Store a blank result as absent (null). A nonblank trimmed result may contain up to 500 characters. Duplicate names are allowed; IDs are authoritative. | FR-03, FR-04 |
 | BR-04 | Groups are flat. Sets are assigned to at most one group; removing a group moves its sets to Ungrouped. | FR-03, FR-04 |
 | BR-05 | A set may be empty. Cards have one parent set; front and back text each contain 1–2,000 characters after trimming. Duplicate cards are allowed. | FR-05 |
@@ -59,18 +59,18 @@ flowchart TD
 - A new card is eligible immediately; reviewed card eligible iff due date is not later than today's date.
 - Each eligible card appears at most once in the session; forgotten cards return tomorrow, not again in the current session.
 - New cards created mid-session enter a future session, not this snapshot. If a queued card no longer exists or no longer belongs to the active profile, skip it. Keep its place in the frozen ordering: the next card shows its original one-based position out of the original queue size. Skipping card 2 of 3 leaves card 3 at “3 of 3” and contributes zero committed ratings.
-- Empty queue: state that nothing is due; optionally provide a route to Free Study or library, not manual grade before a card is due.
+- Refresh counts on screen resume and review start using the current local date. If the eligible queue is empty, stay at the entry screen, explain that nothing is due and offer Library or Free Study as appropriate.
 
 ### BR-11 — Recall response and atomic update (FR-08, FR-09)
 
 - Each card starts on front. Flip is available at any point; a learner must reveal the back at least once before rating.
 - Remembered and Forgot are self-reported. No automatic semantic checking.
-- On rating, disable rating controls during save. Validate eligibility, current ownership and session-card uniqueness. Record grade and new scheduling state atomically.
-- Advance once the committed outcome is known. A rolled-back grade leaves all learning data unchanged and the current card available for retry. If the grade committed but its acknowledgement was lost, retrying the same session/card returns the original committed result without adding a rating or updating the schedule again.
+- On rating, disable both grade actions, Exit and system Back. Validate ownership and eligibility for the originating profile. Record the log and schedule in one Room transaction with a unique (sessionId, cardId) key.
+- Advance once on commit. A duplicate submission leaves the first log and schedule intact. A rollback leaves the revealed card available for retry. Restore navigation after either outcome.
 
 ### BR-12 — Date scheduling (FR-09)
 
-The approved interval ladder uses date-only values and an injected clock. Let today be the device local calendar date captured at rating commit. Store dates, not millisecond multiples of 24 hours; compare with the current device local date on subsequent launches. Log actual review timestamps separately. Changing device date/time zone may affect what is due; do not retroactively rewrite stored review dates.
+The approved interval ladder uses date-only values and takes the local review date as an explicit input. Let today be the device local calendar date captured at rating commit. Store dates, not millisecond multiples of 24 hours; compare with the current device local date on subsequent launches. Log actual review timestamps separately. Changing device date/time zone may affect what is due; do not retroactively rewrite stored review dates.
 
 | Event | Transition | Next review |
 | --- | --- | --- |
@@ -94,7 +94,7 @@ Examples:
 
 ### BR-13 — Interrupted session and summary (FR-11, FR-12)
 
-- Back/exit asks whether to end the session if unreviewed cards remain. Confirmed ratings remain committed.
+- When a grade save is idle, Back/Exit asks whether to end the session if unreviewed cards remain. Confirmed ratings remain committed.
 - During rotation, preserve queue/index/flip state when possible via ViewModel. After process death, creating a fresh queue is acceptable; do not revert or repeat committed grades.
 - Summary: reviewed = remembered + forgot; recall rate = remembered / reviewed × 100%, rounded to whole percent. If reviewed = 0, show no percentage.
 - Exit returns to the starting scope; outstanding ungraded cards remain due/new.

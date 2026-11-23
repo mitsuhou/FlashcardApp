@@ -67,7 +67,7 @@ Library has a prominent + action opening New study set / New group. A centered +
 
 On first launch without profiles, open profile creation/selection. After selecting a profile, Home is the review dashboard. Opening Library shows Study Sets by default (REF-01); the screenshot does not imply bypassing profile onboarding. The navigation bar remains available while browsing; hide it during focused study and editing where appropriate.
 
-The active profile scopes all content. Switching profiles clears the old navigation stack and session state. Omit Solutions, Classes and other online-oriented navigation.
+The active profile scopes all content. Switching profiles clears the old navigation stack and session state and cancels the old screen’s observations. Omit Solutions, Classes and other online-oriented navigation.
 
 ## 4. Library — Study Sets (REF-01)
 
@@ -199,11 +199,11 @@ Use Save/Cancel, labeled fields, inline errors and scrolling. Disable saving inv
 
 ### Interaction rules
 
-1. Start a session using eligible new/due cards from the approved scope; no arbitrary future cards.
+1. At review start refresh counts for the current local date. Start a session only for a nonempty queue of eligible new/due cards. Otherwise show the empty state at the entry screen.
 2. Present each card front-side up. Allow repeated flipping.
 3. Enable Remembered/Forgot only after the answer has been revealed at least once.
 4. Rating is a self-assessment, not automated semantic grading.
-5. Disable grading controls while committing the grade and next review date. Advance only after success; on error retain the current card and offer retry.
+5. Disable both ratings, Exit and system Back while saving. After commit, advance once and enable navigation. On failure, enable navigation and retain the revealed card for retry.
 6. Reset the next card to its front and update session progress. Prevent duplicate ratings.
 7. Show Review Summary at session end. Confirm early exit; preserve committed ratings.
 

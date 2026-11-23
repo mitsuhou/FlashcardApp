@@ -8,14 +8,16 @@ The [clarified specification](spec.md) settles product behavior. The [constituti
 | --- | --- |
 | [Settings](../../settings.gradle.kts), [root build](../../build.gradle.kts) and [app build](../../app/build.gradle.kts) | Keep the existing single `:app` module, Kotlin DSL, built-in Kotlin in AGP 9.3.3, Compose plugin 2.2.10 and Java 11 compile target. Adding the legacy Kotlin Android plugin would compete with AGP's Kotlin support. |
 | [Gradle wrapper](../../gradle/wrapper/gradle-wrapper.properties) and [daemon criteria](../../gradle/gradle-daemon-jvm.properties) | Keep Gradle 9.5.0 and the configured JDK 25 daemon. The host has JDK 25 available even though its shell defaults to JDK 21. Keep Google Maven, Maven Central and the existing plugin repositories. |
-| App SDK configuration and available runtime | Keep minSdk 24, compileSdk 37 and targetSdk 37. The local SDK has Platform 37.0 and the connected WayDroid device reports API 33. The course handset is unspecified. API 26 in Tech Stacks is a suggestion. Retaining API 24 supports the available device and preserves the template's installation range. |
+| App SDK configuration and available runtime | Keep minSdk 24, compileSdk 37 and targetSdk 37. The local SDK has Platform 37.0 and the connected WayDroid device reports API 33. The course handset is unspecified. The verified API 24 floor preserves the template's installation range. |
 | [Version catalog](../../gradle/libs.versions.toml) and existing test dependencies | Retain Compose BOM 2026.02.01, BOM-managed UI, tooling and Material 3, Activity Compose 1.13.0, Core KTX 1.19.1 and Lifecycle Runtime KTX 2.11.0. Keep JUnit 4.13.2, AndroidX Test Ext JUnit 1.3.0, Espresso 3.7.0 and BOM-managed Compose JUnit4 tests. |
 
 AGP 9.3's Gradle and Build Tools requirements are compatible with the wrapper and installed Build Tools 36.0.0. Keep the build JVM and Android bytecode settings separate. [AGP compatibility](https://developer.android.com/build/releases/agp-9-3-0-release-notes) · [Built-in Kotlin](https://developer.android.com/build/migrate-to-built-in-kotlin)
 
 ### Minimal catalog additions for implementation
 
-These are selected coordinates for Phase 1. Preserve existing catalog aliases. Verify resolved classpaths, test setup, starter build and API 24 starter launch in Phase 1. Verify Room compiler output and the exported schema against the five entities in Phase 2. A full build of these future additions has not been run.
+Phase 1 resolved these dependencies, built the starter and launched it on API 24.
+See [Phase 1 verification](quickstart.md#phase-1-verification) for the observed classpaths.
+T013 checks the exported schema when the database is implemented.
 
 | Addition | Planned pin and use | Alternative considered |
 | --- | --- | --- |
@@ -30,20 +32,32 @@ These are selected coordinates for Phase 1. Preserve existing catalog aliases. V
 
 | Decision | Rationale | Alternative considered |
 | --- | --- | --- |
-| One AppContainer, three repositories and a small pure scheduling package | Screen ViewModels coordinate events and expose immutable state. The same ownership checks apply to navigation IDs, counts and background completions. | A use-case class per CRUD action or a domain module would add indirection to simple repository calls. |
-| Profile selection has a lifetime | Scope an active workspace to a profile ID and selection generation. Serialize selection changes and writes, validate the originating scope, and discard stale emissions. This protects A → B → A as well as A → B. | Filtering already-loaded content in the UI leaves stale writes possible. |
-| Relational ownership and one grade transaction | A composite owner/group relationship prevents cross-profile moves. A durable session/card key works across retries. Persist grade and schedule together, then acknowledge. Details and failure cases are in the [data model](data-model.md). | A disabled button alone cannot handle a commit whose acknowledgement is lost. |
+| One AppContainer, three repositories and pure Kotlin functions | Screen ViewModels coordinate events and expose immutable state. Pass DAOs directly to repositories. Use ordinary Flow observations, suspend operations and one standard ViewModel factory. | A use-case class per CRUD action or a domain module would add indirection to simple repository calls. |
+| Ownership by profileId | DAO queries use the originating profileId and verify parent ownership. Switching clears the old stack and cancels its UI observations. | A started write can finish for its owner. Filtering a loaded list in Compose would leave detail and write operations unprotected. |
+| Relational ownership and one grade transaction | A composite owner/group relationship prevents cross-profile moves. The session/card primary key and one Room transaction protect both writes across concurrent submissions and restart. Details and failure cases are in the [data model](data-model.md). | A disabled rating button alone cannot enforce uniqueness in storage. |
 | Freeze only the review queue | A session UUID, snapshot and current face live in a ViewModel. Saved logs and dates are durable. Rotation retains progress, while process death permits a fresh queue. | Persisting an entire resumable session would expand FR-12. |
-| Use the confirmed binary ladder | Use a pure stage/grade/date function and an injectable clock with the current device zone at the repository boundary. A late grade starts from its actual local day. | SM-2 and FSRS require inputs or policy beyond BR-12. |
+| Use the confirmed binary ladder | Use a pure stage/grade/date function with an explicit local date. Read the current day on resume and review start and at grading time. A late grade starts from its actual local day. | SM-2 and FSRS require inputs or policy beyond BR-12. |
 | Render the approved Android adaptation of all seven references | Retain the card hierarchy, dark palette and two recall controls, and use the confirmed Set Detail list for saved dates. Native semantics and explicit controls support touch and assistive input. | Copying the reference toolbars would add unapproved functions. |
-| Keep learner records on device | The starter enables Auto Backup and supplies sample-only backup rules. In Phase 1 disable app backup and explicitly exclude the database domain and the DataStore files from applicable legacy backup and modern cloud/device-transfer rules. Verify merged release policy. [Android backup rules](https://developer.android.com/identity/data/autobackup) | Relying on the absence of an Internet permission would leave OS-managed backup eligible. |
+| Keep learner records on device | Phase 1 disabled app backup and explicitly excluded the database domain and the DataStore files from applicable legacy backup and modern cloud/device-transfer rules. The Phase 1 verification records the merged release policy. [Android backup rules](https://developer.android.com/identity/data/autobackup) | Relying on the absence of an Internet permission would leave OS-managed backup eligible. |
 
 ## Reference discrepancies and disposition
 
 - UI Description spells the folder `06-ui-design`. The actual directory is [docs/6-ui-design](../../docs/6-ui-design/). All seven filenames in the reference index exist there.
 - The [2026-11-21 clarifications](spec.md#session-2026-11-21) approve the profile fallback, intervals, field limits, deletion and interruption behavior, and Set Detail date placement. The business rules and technical baseline reflect those decisions.
 - The overview's optional Week 2 images and controls pictured in the commercial app do not enter this plan. The scope is all four P1 stories. Basic rotation and resizing are mandatory. Enhanced large-screen layouts remain deferred.
-- The starter's theme follows system appearance and enables dynamic color. Apply the documented dark palette by default during the UI setup. The existing greeting and example tests are scaffolding.
+- Phase 1 applied the documented dark palette and verified its contrast. The existing greeting and example tests are scaffolding.
 - Spec Kit reports `001-offline-flashcard-study` as the feature identifier from the active feature configuration. Git reports the checkout branch as `main`.
 
-The minimum runtime and technical choices are settled for planning. Phase 1 verifies resolved dependencies, test setup, the starter build and an API 24 starter launch. Phase 2 generates the Room schema and wires the concrete Application, AppContainer and ViewModel factory. Phase 7 exercises calendar arithmetic on API 24. The API 33 WayDroid target can support development tests. Confirm the actual presentation device before the demo.
+The [Android Basics with Compose course](https://developer.android.com/courses/android-basics-compose/course)
+is the primary implementation reference. The local Inventory sample constructs
+OfflineItemsRepository with ItemDao and provides ViewModels through a standard factory.
+Use the [Inventory Room codelab](https://developer.android.com/codelabs/basic-android-kotlin-compose-persisting-data-room)
+for storage and the [Mars Photos manual DI codelab](https://developer.android.com/codelabs/basic-android-kotlin-compose-add-repository)
+for Application and AppContainer wiring. Cupcake illustrates a single NavHost and navigation
+callbacks. Dessert Release illustrates using a single Preferences DataStore. FlashcardApp
+treats profile-selection read failures as retryable and preserves existing Room data on schema changes.
+
+Phase 1 verified the build and starter on API 24. Phase 2 owns schema export and manual wiring.
+Phase 7 exercises calendar arithmetic on API 24.
+
+Confirm the actual presentation device before the demo.

@@ -34,7 +34,7 @@ Primary navigation: Home, Library, Profile/Settings. P2 progress may live on Hom
 | UI-06 | Set detail | Name, description, total and eligible cards, list of card previews, Add card, Free Study, Grade Mode; edit/move/delete actions. | FR-04, FR-05, FR-07, FR-08, FR-10 |
 | UI-07 | Card editor | Front text, back text, optional side-specific image selectors if P2, save/cancel, delete for existing card. | FR-05, FR-06 |
 | UI-08 | Free Study | Front/back card, position, flip, Previous/Next, exit; no grading controls or learning score. | FR-07 |
-| UI-09 | Graded Review | Current card, progress, flip, Remembered/Forgot enabled after reveal; saving indicator; exit action and confirmation. | FR-08, FR-09, FR-12 |
+| UI-09 | Graded Review | Current card, progress, flip, Remembered/Forgot enabled after reveal; saving indicator. Both ratings, Exit and system Back are disabled during save. Navigation resumes after success or failure. | FR-08, FR-09, FR-12 |
 | UI-10 | Review summary | Reviewed, remembered, forgot, recall rate if defined; Done / return to start scope. | FR-11 |
 | UI-11 | Profile/settings | Active profile, rename/delete/switch, optional appearance preferences. | FR-01, FR-02, FR-15 |
 
@@ -54,7 +54,7 @@ Primary navigation: Home, Library, Profile/Settings. P2 progress may live on Hom
 - Show visible “Front” / “Back” or equivalent labels; flip has a labeled accessible action. Animation supports comprehension but is not needed to study.
 - Free Study shows current position and navigation; no grade indicators.
 - Graded Review shows position and number of cards reviewed; the user first attempts recall, then reveals the answer. Buttons use both text and icon. No ambiguous unlabeled red or green buttons.
-- Save failure leaves the card visible with retry. If no eligible cards exist, explain that review is complete for now and link back to library/free study.
+- Save failure leaves the card visible with retry. If no eligible cards exist, stay on Home or Set Detail, explain that nothing is due and offer Library or Free Study.
 
 ### Profile, offline and lifecycle
 
