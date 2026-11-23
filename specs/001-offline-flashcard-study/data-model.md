@@ -18,7 +18,7 @@ epoch days, converted to and from Kotlin-facing `LocalDate` values.
 | StudyGroup | id (PK), ownerId, name, optional description | ownerId → Profile.id, delete cascade. Unique index (ownerId, id) serves as a composite parent key and supports profile listing. |
 | StudySet | id (PK), ownerId, optional groupId, name, optional description | ownerId → Profile.id, delete cascade. (ownerId, groupId) → StudyGroup(ownerId, id), delete NO ACTION. Index (ownerId, groupId) serves both ownership and membership lookups. |
 | Flashcard | id (PK), setId, front, back, createdAt, stage (initially 0), optional dueDay (initially null) | setId → StudySet.id, delete cascade. Indexes (setId, createdAt, id) and (setId, dueDay, id) support ordered browsing and eligible-card queries. |
-| ReviewLog | sessionId (UUID text), cardId, grade (Remembered or Forgot), reviewedAt, previousStage, newStage, nextDueDay | Primary key (sessionId, cardId) enforces one rating per card in a session and supports session totals. cardId → Flashcard.id, delete cascade. Index cardId for history and deletion. |
+| ReviewLog | sessionId (UUID text), cardId, grade (Remembered or Forgot), reviewedAt | Primary key (sessionId, cardId) enforces one rating per card in a session and supports session totals. cardId → Flashcard.id, delete cascade. Index cardId for history and deletion. |
 
 A card has exactly one owning profile through its set, and a review through its card. Using
 those joins for access checks avoids independent owner fields that could disagree. A set

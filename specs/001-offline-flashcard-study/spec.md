@@ -233,8 +233,7 @@ the browsing destinations. Hide that navigation during focused study.
   next review date. Ownership follows its set.
 - **Graded session** has a starting profile or set scope, an ordered snapshot, a current position
   and a summary derived from its saved ratings.
-- **Review record** links one card and session to a self-rating, actual time, previous/new stage
-  and next review date. It belongs to the same profile as the card.
+- **Review record** records the self-rating and time for one card in one session. It belongs to the same profile as the card.
 
 ## Success Criteria
 

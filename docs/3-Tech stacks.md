@@ -71,7 +71,7 @@ flowchart TD
 | Group | ID, owner profile, name, optional description |
 | FlashcardSet | ID, owner profile, optional group, name, optional description |
 | Flashcard | ID, parent set, front/back text, optional image references, created timestamp, stage, nullable review due date |
-| ReviewLog | Composite primary key (session ID, card ID), grade, timestamp, previous/new stage and next review date |
+| ReviewLog | Composite primary key (session ID, card ID), grade, actual review timestamp |
 
 Every child relationship must resolve to the same owner. Formal schema and ownership enforcement belong in the generated data model. Use a date-only representation for due dates and an instant for review logs; specify the time-zone policy in the plan.
 
