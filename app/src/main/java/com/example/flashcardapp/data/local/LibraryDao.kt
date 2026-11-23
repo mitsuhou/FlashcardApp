@@ -5,12 +5,11 @@ import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
-data class GroupWithCount(val id: Long, val name: String, val description: String?, val setCount: Int)
+data class GroupWithCount(val id: Long, val name: String, val setCount: Int)
 
 data class SetWithCounts(
     val id: Long,
     val name: String,
-    val description: String?,
     val groupId: Long?,
     val cardCount: Int,
     val eligibleCount: Int
@@ -19,7 +18,7 @@ data class SetWithCounts(
 @Dao
 interface LibraryDao {
     @Query("""
-        SELECT g.id, g.name, g.description, COUNT(s.id) AS setCount
+        SELECT g.id, g.name, COUNT(s.id) AS setCount
         FROM study_groups AS g
         LEFT JOIN study_sets AS s ON s.groupId = g.id AND s.ownerId = g.ownerId
         WHERE g.ownerId = :profileId
@@ -54,7 +53,7 @@ interface LibraryDao {
 
     // A null group filter shows the entire library, including ungrouped sets.
     @Query("""
-        SELECT s.id, s.name, s.description, s.groupId, COUNT(c.id) AS cardCount,
+        SELECT s.id, s.name, s.groupId, COUNT(c.id) AS cardCount,
                COUNT(CASE WHEN c.dueDay IS NULL OR c.dueDay <= :today THEN c.id END) AS eligibleCount
         FROM study_sets AS s
         LEFT JOIN flashcards AS c ON c.setId = s.id
