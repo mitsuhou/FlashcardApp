@@ -1,11 +1,11 @@
 # FlashcardApp MVP status
 
-**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **16 of 51 tasks complete** (T001–T016). T017–T051 await approval or implementation. [Implementation tasks](tasks.md)
+**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **17 of 51 tasks complete** (T001–T017). T018–T051 await approval or implementation. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
-| 2 · Database, repositories and shared foundations | T017–T023 |
+| 2 · Database, repositories and shared foundations | T018–T023 |
 | 3 · US4 Local Profiles | T024–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
@@ -34,4 +34,6 @@
 
 **T016 approved.** All 15 debug JVM tests passed. A separate JVM check with a DAO test double verified field validation, normalization, scoped write arguments and affected-row handling. Room generated the group deletion transaction. In-memory SQLite checks using the v1 schema and DAO queries verified scoped counts, read-only card order, preservation of schedules and history after edits and moves, and rollback when group deletion failed after detachment. Device-level Room integration tests are scheduled for T020.
 
-**Current task.** T017 (review counts, queue snapshot and card lookup) is implemented and awaiting review. All 15 debug JVM tests passed. A JVM check with a DAO test double verified date and scope arguments, empty snapshots and nullable lookups for deleted, foreign and rescheduled cards. SQLite checks on the v1 schema verified Home and set counts, due-before-new ordering with ties, forgotten stage-0 cards, next-day eligibility and exclusion of later arrivals from the original snapshot. On-device Room queue tests are scheduled for T022.
+**T017 approved.** All 15 debug JVM tests passed. A JVM check with a DAO test double verified date and scope arguments, empty snapshots and nullable lookups for deleted, foreign and rescheduled cards. SQLite checks on the v1 schema verified Home and set counts, due-before-new ordering with ties, forgotten stage-0 cards, next-day eligibility and exclusion of later arrivals from the original snapshot. On-device Room queue tests are scheduled for T022.
+
+**Current task.** T018 (atomic grading and committed session counts) is implemented and awaiting review. All 15 debug JVM tests passed. Room generated a transaction around the DAO method. A separate JVM check ran the compiled grading method and its DAO queries against a temporary SQLite file using a test adapter. Failed and zero-row updates rolled back the log, a retry committed once, and competing grades produced one log and one schedule change. Scope, eligibility, local-day scheduling near midnight and counts after reopening the file passed. On-device Room transaction tests are scheduled for T023.

@@ -2,7 +2,11 @@ package com.example.flashcardapp.data.local
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import com.example.flashcardapp.domain.ReviewGrade
+import com.example.flashcardapp.domain.isEligibleForReview
+import com.example.flashcardapp.domain.nextReviewSchedule
+import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 
 data class ReviewCounts(val newCount: Int, val dueCount: Int)
@@ -83,4 +87,27 @@ interface ReviewDao {
         )
     """)
     suspend fun updateSchedule(profileId: Long, setId: Long?, cardId: Long, stage: Int, dueDay: Long): Int
+
+    @Transaction
+    suspend fun submitGrade(
+        profileId: Long,
+        setId: Long?,
+        sessionId: String,
+        cardId: Long,
+        grade: ReviewGrade,
+        reviewedAt: Long,
+        reviewDate: LocalDate
+    ): Boolean {
+        val card = getCard(profileId, cardId, setId) ?: return false
+        if (hasGrade(profileId, sessionId, cardId)) return true
+
+        val dueDate = card.dueDay?.let(LocalDate::ofEpochDay)
+        if (!isEligibleForReview(dueDate, reviewDate)) return false
+
+        val schedule = nextReviewSchedule(card.stage, grade, reviewDate)
+        insertGrade(profileId, setId, sessionId, cardId, grade, reviewedAt)
+        val updated = updateSchedule(profileId, setId, cardId, schedule.stage, schedule.dueDate.toEpochDay())
+        check(updated == 1) { "Could not update the graded card's schedule." }
+        return true
+    }
 }
