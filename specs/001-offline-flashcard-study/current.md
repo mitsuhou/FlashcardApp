@@ -1,11 +1,11 @@
 # FlashcardApp MVP status
 
-**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **13 of 51 tasks complete** (T001–T013). T014–T051 await approval or implementation. [Implementation tasks](tasks.md)
+**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **14 of 51 tasks complete** (T001–T014). T015–T051 await approval or implementation. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
-| 2 · Database, repositories and shared foundations | T014–T023 |
+| 2 · Database, repositories and shared foundations | T015–T023 |
 | 3 · US4 Local Profiles | T024–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
@@ -28,4 +28,6 @@
 
 **T013 approved.** KSP compiled the database and three DAOs, the v1 schema was exported and checked, the debug APK built, and all 15 JVM tests passed. [Database verification](quickstart.md#t013-database-verification)
 
-**Current task.** T014 (profile repository) is implemented and awaiting review. All 15 debug JVM tests passed. A separate JVM check with a test double for ProfileDao verified the list flow, trimmed names, blank-name rejection, distinct generated IDs for matching names, and rename and delete by ID. Both operations reported a missing ID.
+**T014 approved.** All 15 debug JVM tests passed. A separate JVM check with a test double for ProfileDao verified the list flow, trimmed names, blank-name rejection, distinct generated IDs for matching names, and rename and delete by ID. Both operations reported a missing ID.
+
+**Current task.** T015 (persist and validate the selected profile ID) is implemented and awaiting review. All 15 debug JVM tests passed. A separate JVM check with DAO and DataStore test doubles verified restoration, retry after read and write failures, and an absent selection with zero or one remaining profile. Deleting A preserved a newer selection of B. When preference cleanup failed, observers and a new repository both treated the deleted ID as unselected. File-backed integration tests are scheduled for T021.
