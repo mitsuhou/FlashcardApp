@@ -1,11 +1,11 @@
 # FlashcardApp MVP status
 
-**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **12 of 51 tasks complete** (T001–T012). T013–T051 await approval or implementation. [Implementation tasks](tasks.md)
+**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **13 of 51 tasks complete** (T001–T013). T014–T051 await approval or implementation. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
-| 2 · Database, repositories and shared foundations | T013–T023 |
+| 2 · Database, repositories and shared foundations | T014–T023 |
 | 3 · US4 Local Profiles | T024–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
@@ -26,4 +26,6 @@
 
 **T012 approved.** All 15 debug JVM tests passed. Room compiled the DAO in an isolated fixture. SQLite checks on its generated schema verified that Home counts agree with the set projections and queue, tie ordering is stable, empty scopes return zero counts, foreign writes are rejected, and session totals count only the owning profile’s grades.
 
-**Current task.** T013 (Room database and v1 schema export) is implemented and awaiting review. KSP compiled the database and three DAOs, the debug APK built, and all 15 JVM tests passed. [Database verification](quickstart.md#t013-database-verification)
+**T013 approved.** KSP compiled the database and three DAOs, the v1 schema was exported and checked, the debug APK built, and all 15 JVM tests passed. [Database verification](quickstart.md#t013-database-verification)
+
+**Current task.** T014 (profile repository) is implemented and awaiting review. All 15 debug JVM tests passed. A separate JVM check with a test double for ProfileDao verified the list flow, trimmed names, blank-name rejection, distinct generated IDs for matching names, and rename and delete by ID. Both operations reported a missing ID.
