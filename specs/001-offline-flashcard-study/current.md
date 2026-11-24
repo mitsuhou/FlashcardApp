@@ -1,12 +1,12 @@
 # FlashcardApp MVP status
 
-**2026-11-24 · Phases 1 and 2 complete. Phase 3 in progress.** The tracker shows **23 of 51 tasks complete** (T001–T023). T024–T051 are pending. [Implementation tasks](tasks.md)
+**2026-11-24 · Phases 1 and 2 complete. Phase 3 in progress.** The tracker shows **25 of 51 tasks complete** (T001–T025). T026–T051 are pending. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
 | 2 · Database, repositories and shared foundations | None |
-| 3 · US4 Local Profiles | T024–T029 |
+| 3 · US4 Local Profiles | T026–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
 | 6 · US1 Graded Review | T042–T047 |
@@ -48,4 +48,6 @@
 
 **T023 approved.** Two file-backed Room tests cover a failed grade, retry, conflicting submissions and eligibility after reopen. The [Phase 2 checkpoint](quickstart.md#phase-2-foundation-checkpoint) passed with 15 JVM tests and 22 instrumentation tests. All Phase 2 tasks are verified and approved.
 
-**T024 awaits review.** Three Compose acceptance tests launch MainActivity and exercise profile creation, rename and activity relaunch, switching and Back, and confirmed deletion through the one-survivor and zero-profile states. The switching fixture uses two same-name sets with distinct Home workloads. The test APK compiled. On WayDroid API 33 all three tests failed at their first expected UI element (the name field or the seeded learner in the selector). MainActivity still renders the starter greeting. Passing these tests through the integrated UI is the T029 checkpoint.
+**T024 approved.** Three Compose acceptance tests launch MainActivity and exercise profile creation, rename and activity relaunch, switching and Back, and confirmed deletion through the one-survivor and zero-profile states. The switching fixture uses two same-name sets with distinct Home workloads. The test APK compiled. On WayDroid API 33 all three tests failed at their first expected UI element (the name field or the seeded learner in the selector). MainActivity still renders the starter greeting. Passing these tests through the integrated UI is the T029 checkpoint.
+
+**T025 approved.** Three JVM tests specify loading and retry after a selection read failure, retrying a failed selection after creation without duplicating the profile, and cancellation of the old Home count subscription when switching learners. The targeted Gradle run stopped at test compilation because the profile state and ViewModel (T026) and Home ViewModel (T028) are pending. No test assertions ran.
