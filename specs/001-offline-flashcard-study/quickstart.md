@@ -32,7 +32,7 @@ On 2026-11-24, the debug app and instrumentation APKs built offline. All 15 JVM 
 - Seven library tests, seven profile-selection tests and four queue tests passed. They cover ownership, cascades, restored selection, queue order and local-date eligibility.
 - Both grade transaction tests passed. A forced failure during the schedule update rolled back the new log and preserved the previous grade. After retry, a conflicting repeat and file reopen, the session held one Remembered and one Forgot, with one of three cards still eligible that day. Concurrent conflicting submissions for one new card produced one log and one matching schedule update.
 
-The checkpoint passed. Phase 2 awaits human approval of T023.
+The checkpoint passed. T023 was approved, completing Phase 2 (T006–T023).
 
 ## Prepare and build
 

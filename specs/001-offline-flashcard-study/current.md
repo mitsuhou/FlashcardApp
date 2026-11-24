@@ -1,11 +1,11 @@
 # FlashcardApp MVP status
 
-**2026-11-24 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **22 of 51 tasks complete** (T001–T022). T023–T051 await approval or implementation. [Implementation tasks](tasks.md)
+**2026-11-24 · Phases 1 and 2 complete.** The tracker shows **23 of 51 tasks complete** (T001–T023). T024–T051 are pending. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
-| 2 · Database, repositories and shared foundations | T023 |
+| 2 · Database, repositories and shared foundations | None |
 | 3 · US4 Local Profiles | T024–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
@@ -46,4 +46,4 @@
 
 **T022 approved.** Four new Room tests passed on WayDroid API 33. They verified Home and set counts, ID tie-breaks, empty queues, exclusion of future and foreign cards, and the original positions in a snapshot after deletion, rescheduling and a new arrival. A forgotten stage-0 card became due the next day. Counts and eligibility also changed across two zones at a fixed instant, with the stored due date preserved. All 15 JVM tests and all 20 instrumentation tests passed.
 
-**Current task.** T023 is verified and awaits approval. Two file-backed Room tests cover a failed grade, retry, conflicting submissions and eligibility after reopen. The [Phase 2 checkpoint](quickstart.md#phase-2-foundation-checkpoint) passed with 15 JVM tests and 22 instrumentation tests. T023 is the final task in Phase 2.
+**T023 approved.** Two file-backed Room tests cover a failed grade, retry, conflicting submissions and eligibility after reopen. The [Phase 2 checkpoint](quickstart.md#phase-2-foundation-checkpoint) passed with 15 JVM tests and 22 instrumentation tests. All Phase 2 tasks are verified and approved.
