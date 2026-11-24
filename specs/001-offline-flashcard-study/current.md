@@ -1,11 +1,11 @@
 # FlashcardApp MVP status
 
-**2026-11-24 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **19 of 51 tasks complete** (T001–T019). T020–T051 await approval or implementation. [Implementation tasks](tasks.md)
+**2026-11-24 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **20 of 51 tasks complete** (T001–T020). T021–T051 await approval or implementation. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
-| 2 · Database, repositories and shared foundations | T020–T023 |
+| 2 · Database, repositories and shared foundations | T021–T023 |
 | 3 · US4 Local Profiles | T024–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
@@ -40,4 +40,6 @@
 
 **T019 approved.** FlashcardApplication owns one lazy container that builds the three repositories from one Room database and one Preferences DataStore. Following Inventory's provider pattern, AppViewModelFactory exposes one standard AndroidX factory. Its screen initializers will obtain the application through CreationExtras as the screens arrive. The merged debug and release manifests and the packaged debug manifest identify FlashcardApplication. All 15 debug JVM tests and both instrumentation tests passed on the review build. The WayDroid API 33 test launched MainActivity and confirmed its default ViewModel creation extras resolve to the application's container.
 
-**Current task.** T020 (Room library integrity tests) is implemented and awaiting review. All seven new tests passed on WayDroid API 33. They cover same-name libraries in two profiles, foreign reads and writes, cross-owner group links, trimmed and cleared descriptions, preservation of schedules and history after edits and group removal, and independent card, set and profile cascades. File-backed reopen checks compared surviving records and inspected the card and review log tables for orphans. The full run passed all 15 JVM tests and all nine instrumentation tests.
+**T020 approved.** All seven new tests passed on WayDroid API 33. They cover same-name libraries in two profiles, foreign reads and writes, cross-owner group links, trimmed and cleared descriptions, preservation of schedules and history after edits and group removal, and independent card, set and profile cascades. File-backed reopen checks compared surviving records and inspected the card and review log tables for orphans. The full run passed all 15 JVM tests and all nine instrumentation tests.
+
+**Current task.** T021 (profile selection persistence and isolation tests) is implemented and awaiting review. Seven new tests passed on WayDroid API 33 using file-backed Room and a temporary Preferences DataStore. Reopening both files restored a valid selection and ignored a stale ID after interrupted cleanup. Coverage includes zero profiles, explicit selection with one survivor, preserving a newer selection during cleanup, retrying injected read and write failures, and selecting an already-created profile without duplication. A paused library write completed only for its original owner after a switch, and the new owner could neither read nor edit the old group. The full suite passed all 15 JVM tests and all 16 instrumentation tests.
