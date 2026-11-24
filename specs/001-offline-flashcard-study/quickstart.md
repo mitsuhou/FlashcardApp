@@ -23,6 +23,17 @@ On 2026-11-23, `./gradlew --offline :app:assembleDebug :app:testDebugUnitTest` b
 
 A host SQLite check using the exported SQL rejected a cross-profile group link and a duplicate session/card grade. Reopening the test file preserved its card and review. The database builder uses Room's default migration policy. This first schema establishes the baseline for future migration tests.
 
+## Phase 2 foundation checkpoint
+
+On 2026-11-24, the debug app and instrumentation APKs built offline. All 15 JVM tests and all 22 instrumentation tests passed on the checkpoint run. The device suites ran on WayDroid x86_64, Android 13 (API 33), with zero skipped tests.
+
+- KSP generated the database and three DAO implementations. The exported v1 schema contains five tables and uses `(sessionId, cardId)` as the review log primary key.
+- The merged debug manifest names `FlashcardApplication`. The activity wiring test resolved its container through the default ViewModel creation extras.
+- Seven library tests, seven profile-selection tests and four queue tests passed. They cover ownership, cascades, restored selection, queue order and local-date eligibility.
+- Both grade transaction tests passed. A forced failure during the schedule update rolled back the new log and preserved the previous grade. After retry, a conflicting repeat and file reopen, the session held one Remembered and one Forgot, with one of three cards still eligible that day. Concurrent conflicting submissions for one new card produced one log and one matching schedule update.
+
+The checkpoint passed. Phase 2 awaits human approval of T023.
+
 ## Prepare and build
 
 1. Open the repository root (the directory containing `settings.gradle.kts`, `gradlew` and

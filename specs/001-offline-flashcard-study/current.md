@@ -1,11 +1,11 @@
 # FlashcardApp MVP status
 
-**2026-11-24 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **21 of 51 tasks complete** (T001–T021). T022–T051 await approval or implementation. [Implementation tasks](tasks.md)
+**2026-11-24 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **22 of 51 tasks complete** (T001–T022). T023–T051 await approval or implementation. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
-| 2 · Database, repositories and shared foundations | T022–T023 |
+| 2 · Database, repositories and shared foundations | T023 |
 | 3 · US4 Local Profiles | T024–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
@@ -44,4 +44,6 @@
 
 **T021 approved.** Seven new tests passed on WayDroid API 33 using file-backed Room and a temporary Preferences DataStore. Reopening both files restored a valid selection and ignored a stale ID after interrupted cleanup. Coverage includes zero profiles, explicit selection with one survivor, preserving a newer selection during cleanup, retrying injected read and write failures, and selecting an already-created profile without duplication. A paused library write completed only for its original owner after a switch, and the new owner could neither read nor edit the old group. The full suite passed all 15 JVM tests and all 16 instrumentation tests.
 
-**Current task.** T022 (review queue and date tests) is implemented and awaiting review. Four new Room tests passed on WayDroid API 33. They verified Home and set counts, ID tie-breaks, empty queues, exclusion of future and foreign cards, and the original positions in a snapshot after deletion, rescheduling and a new arrival. A forgotten stage-0 card became due the next day. Counts and eligibility also changed across two zones at a fixed instant, with the stored due date preserved. All 15 JVM tests and all 20 instrumentation tests passed.
+**T022 approved.** Four new Room tests passed on WayDroid API 33. They verified Home and set counts, ID tie-breaks, empty queues, exclusion of future and foreign cards, and the original positions in a snapshot after deletion, rescheduling and a new arrival. A forgotten stage-0 card became due the next day. Counts and eligibility also changed across two zones at a fixed instant, with the stored due date preserved. All 15 JVM tests and all 20 instrumentation tests passed.
+
+**Current task.** T023 is verified and awaits approval. Two file-backed Room tests cover a failed grade, retry, conflicting submissions and eligibility after reopen. The [Phase 2 checkpoint](quickstart.md#phase-2-foundation-checkpoint) passed with 15 JVM tests and 22 instrumentation tests. T023 is the final task in Phase 2.
