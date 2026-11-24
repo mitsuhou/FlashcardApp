@@ -1,11 +1,11 @@
 # FlashcardApp MVP status
 
-**2026-11-23 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **18 of 51 tasks complete** (T001–T018). T019–T051 await approval or implementation. [Implementation tasks](tasks.md)
+**2026-11-24 · Phase 1 complete. Phase 2 is in progress.** The tracker shows **19 of 51 tasks complete** (T001–T019). T020–T051 await approval or implementation. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
-| 2 · Database, repositories and shared foundations | T019–T023 |
+| 2 · Database, repositories and shared foundations | T020–T023 |
 | 3 · US4 Local Profiles | T024–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
@@ -38,4 +38,6 @@
 
 **T018 approved.** All 15 debug JVM tests passed. Room generated a transaction around the DAO method. A separate JVM check ran the compiled grading method and its DAO queries against a temporary SQLite file using a test adapter. Failed and zero-row updates rolled back the log, a retry committed once, and competing grades produced one log and one schedule change. Scope, eligibility, local-day scheduling near midnight and counts after reopening the file passed. On-device Room transaction tests are scheduled for T023.
 
-**Current task.** T019 (application container and ViewModel factory) is implemented and awaiting review. FlashcardApplication owns one lazy container that builds the three repositories from one Room database and one Preferences DataStore. Following Inventory's provider pattern, AppViewModelFactory exposes one standard AndroidX factory. Its screen initializers will obtain the application through CreationExtras as the screens arrive. The merged debug and release manifests and the packaged debug manifest identify FlashcardApplication. All 15 debug JVM tests and both instrumentation tests passed on the review build. The WayDroid API 33 test launched MainActivity and confirmed its default ViewModel creation extras resolve to the application's container.
+**T019 approved.** FlashcardApplication owns one lazy container that builds the three repositories from one Room database and one Preferences DataStore. Following Inventory's provider pattern, AppViewModelFactory exposes one standard AndroidX factory. Its screen initializers will obtain the application through CreationExtras as the screens arrive. The merged debug and release manifests and the packaged debug manifest identify FlashcardApplication. All 15 debug JVM tests and both instrumentation tests passed on the review build. The WayDroid API 33 test launched MainActivity and confirmed its default ViewModel creation extras resolve to the application's container.
+
+**Current task.** T020 (Room library integrity tests) is implemented and awaiting review. All seven new tests passed on WayDroid API 33. They cover same-name libraries in two profiles, foreign reads and writes, cross-owner group links, trimmed and cleared descriptions, preservation of schedules and history after edits and group removal, and independent card, set and profile cascades. File-backed reopen checks compared surviving records and inspected the card and review log tables for orphans. The full run passed all 15 JVM tests and all nine instrumentation tests.
