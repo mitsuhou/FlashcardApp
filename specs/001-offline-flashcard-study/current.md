@@ -1,6 +1,6 @@
 # FlashcardApp MVP status
 
-**2026-11-24 · Phases 1 and 2 complete.** The tracker shows **23 of 51 tasks complete** (T001–T023). T024–T051 are pending. [Implementation tasks](tasks.md)
+**2026-11-24 · Phases 1 and 2 complete. Phase 3 in progress.** The tracker shows **23 of 51 tasks complete** (T001–T023). T024–T051 are pending. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
@@ -47,3 +47,5 @@
 **T022 approved.** Four new Room tests passed on WayDroid API 33. They verified Home and set counts, ID tie-breaks, empty queues, exclusion of future and foreign cards, and the original positions in a snapshot after deletion, rescheduling and a new arrival. A forgotten stage-0 card became due the next day. Counts and eligibility also changed across two zones at a fixed instant, with the stored due date preserved. All 15 JVM tests and all 20 instrumentation tests passed.
 
 **T023 approved.** Two file-backed Room tests cover a failed grade, retry, conflicting submissions and eligibility after reopen. The [Phase 2 checkpoint](quickstart.md#phase-2-foundation-checkpoint) passed with 15 JVM tests and 22 instrumentation tests. All Phase 2 tasks are verified and approved.
+
+**T024 awaits review.** Three Compose acceptance tests launch MainActivity and exercise profile creation, rename and activity relaunch, switching and Back, and confirmed deletion through the one-survivor and zero-profile states. The switching fixture uses two same-name sets with distinct Home workloads. The test APK compiled. On WayDroid API 33 all three tests failed at their first expected UI element (the name field or the seeded learner in the selector). MainActivity still renders the starter greeting. Passing these tests through the integrated UI is the T029 checkpoint.
