@@ -1,0 +1,9 @@
+<resources>
+    <string name="new_card_count">New: %1$d</string>
+    <string name="due_card_count">Due: %1$d</string>
+    <string name="no_reviews_due">No reviews due</string>
+    <string name="review_now">Review now</string>
+    <string name="library">Library</string>
+    <string name="loading_workload">Loading review counts…</string>
+    <string name="workload_error">Could not load your review counts.</string>
+</resources>

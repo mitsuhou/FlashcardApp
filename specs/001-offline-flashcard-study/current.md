@@ -1,12 +1,12 @@
 # FlashcardApp MVP status
 
-**2026-11-27 · Phases 1 and 2 complete. Phase 3 in progress.** The tracker shows **26 of 51 tasks complete** (T001–T026). T027–T051 are pending. [Implementation tasks](tasks.md)
+**2026-11-27 · Phases 1 and 2 complete. Phase 3 in progress.** The tracker shows **27 of 51 tasks complete** (T001–T027). T028–T051 are pending. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
 | 2 · Database, repositories and shared foundations | None |
-| 3 · US4 Local Profiles | T027–T029 |
+| 3 · US4 Local Profiles | T028–T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
 | 6 · US1 Graded Review | T042–T047 |
@@ -53,3 +53,5 @@
 **T025 approved.** Three JVM tests specify loading and retry after a selection read failure, retrying a failed selection after creation without duplicating the profile, and cancellation of the old Home count subscription when switching learners. The targeted Gradle run stopped at test compilation because the profile state and ViewModel (T026) and Home ViewModel (T028) are pending. No test assertions ran.
 
 **T026 approved.** The profile ViewModel restores selection, validates names and handles create, select, rename and delete events. Retry after creation selects the existing ID. Both debug APKs built and 24 JVM checks passed in a temporary project copy. The integrated Home observation test depends on T028.
+
+**T027 approved.** The profile screen supports creation, explicit selection, rename, and confirmed switch and deletion. Both debug APKs built and both focused Compose tests passed on WayDroid API 33, covering draft restoration, validation and confirmation callbacks. Six themed previews cover the profile UI states.

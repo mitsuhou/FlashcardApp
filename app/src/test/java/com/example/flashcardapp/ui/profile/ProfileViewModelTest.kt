@@ -15,6 +15,7 @@ import com.example.flashcardapp.data.local.ReviewDao
 import com.example.flashcardapp.data.local.SessionCounts
 import com.example.flashcardapp.domain.ReviewGrade
 import com.example.flashcardapp.ui.home.HomeViewModel
+import java.time.LocalDate
 import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -132,6 +133,28 @@ class ProfileViewModelTest {
         assertEquals(ReviewCounts(0, 2), home.uiState.value.counts)
     }
 
+    @Test
+    fun newLocalDayRefreshesHomeCountsWithoutAProfileOrCardWrite() = runTest {
+        store.allowRead.complete(Unit)
+        profiles.selectProfile(alice.id)
+        val counts = HomeCountsDao(alice.id, bao.id)
+        val home = HomeViewModel(profiles, ReviewRepository(counts))
+        models.add(home)
+        val day = LocalDate.of(2026, 11, 27)
+        home.refreshDate(day)
+        runCurrent()
+        counts.alice.emit(ReviewCounts(0, 0))
+        runCurrent()
+        assertEquals(ReviewCounts(0, 0), home.uiState.value.counts)
+        home.refreshDate(day.plusDays(1))
+        runCurrent()
+        assertEquals(day.plusDays(1).toEpochDay(), counts.observedDay)
+        assertNull(home.uiState.value.counts)
+        counts.alice.emit(ReviewCounts(0, 1))
+        runCurrent()
+        assertEquals(ReviewCounts(0, 1), home.uiState.value.counts)
+    }
+
     private class MemorySelectionStore : DataStore<Preferences> {
         private val saved = MutableStateFlow(emptyPreferences())
         val allowRead = CompletableDeferred<Unit>()
@@ -174,12 +197,15 @@ class ProfileViewModelTest {
     private class HomeCountsDao(private val aliceId: Long, private val baoId: Long) : ReviewDao {
         val alice = MutableSharedFlow<ReviewCounts>()
         val bao = MutableSharedFlow<ReviewCounts>()
-        override fun observeReviewCounts(profileId: Long, today: Long, setId: Long?): Flow<ReviewCounts> =
-            when (profileId) {
+        var observedDay: Long? = null
+        override fun observeReviewCounts(profileId: Long, today: Long, setId: Long?): Flow<ReviewCounts> {
+            observedDay = today
+            return when (profileId) {
                 aliceId -> alice
                 baoId -> bao
                 else -> error("Unexpected profile")
             }
+        }
 
         override suspend fun getEligibleCardIds(profileId: Long, today: Long, setId: Long?): List<Long> = error("Unused")
         override suspend fun getCard(profileId: Long, cardId: Long, setId: Long?): Flashcard? = error("Unused")
