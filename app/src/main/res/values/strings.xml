@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">FlashcardApp</string>
+    <string name="loading_profiles">Loading profiles…</string>
+    <string name="saving_profile">Saving profile…</string>
+    <string name="create_failed">Could not create “%1$s”.</string>
+    <string name="rename_failed">Could not rename the profile to “%1$s”.</string>
+    <string name="select_failed">Could not select the profile.</string>
+    <string name="delete_failed">Could not delete the profile.</string>
+    <string name="reload_profiles">Profile information needs to be reloaded.</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="profiles">Profiles</string>
+    <string name="profile">Profile</string>
+    <string name="active_profile">Active profile</string>
+    <string name="rename">Rename</string>
+    <string name="delete_profile">Delete</string>
+    <string name="switch_profile">Switch</string>
+    <string name="confirm_delete_profile">Delete “%1$s” and all its study sets, cards and review history? This cannot be undone.</string>
+    <string name="confirm_switch_profile">Switch to “%1$s”?</string>
+    <string name="create_profile">Create profile</string>
+    <string name="profile_name">Profile name</string>
+    <string name="save">Save</string>
+    <string name="confirm_profile_change">Confirm profile change</string>
 </resources>

@@ -33,6 +33,10 @@ Use the relevant pathways, codelabs and sample apps.
 ## Coding Standards
 
 - Write simple, beginner-friendly Kotlin.
+- Add Compose `@Preview` functions for each new UI screen and reusable
+  UI component. Show representative states in the app theme using sample
+  data and no-op event callbacks. Keep previews independent of real
+  ViewModels, Room, DataStore and Navigation.
 - Follow the architecture and patterns taught in the course.
 - Use simple MVVM, Room, Repository and manual DI.
 - Prefer explicit functions and direct DAO injection.
