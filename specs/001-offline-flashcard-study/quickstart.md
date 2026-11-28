@@ -116,6 +116,17 @@ cascades. The demo uses the actual device day. See the [UI acceptance](../../doc
 
 ## v3.0 verification record
 
-Pending. Record checkpoint date, task IDs, build result, device/API and executed test counts
-after each phase. For final acceptance, record the offline demo results for SC-01–SC-06,
-including orientation, font scale, measurements and any outstanding defects.
+### Phase 2 v3.0 checkpoint
+
+**Passed and approved on 2026-11-28.** Revalidation covered T006, T009, T011–T013,
+T016–T018 and T020–T023. Phase 2 (T006–T023) is complete.
+
+| Check | Result |
+| --- | --- |
+| Room v1 export | Four tables: `profiles`, `study_sets`, `flashcards` and `review_logs`. The exported schema matches the data model, with `identityHash = f4090c945947e676cea4597750c8defe`. |
+| Debug build | `./gradlew :app:assembleDebug :app:testDebugUnitTest` succeeded and KSP regenerated the schema. |
+| JVM unit tests | 15/15 passed, 0 skipped. |
+| Instrumentation tests | `./gradlew :app:connectedDebugAndroidTest` succeeded on WayDroid x86_64, Android 13 (API 33). 23/23 passed, 0 skipped. |
+
+Record later phase checkpoints here as they are verified. Final acceptance includes the
+offline demo results for SC-01–SC-06 with orientation, font scale, measurements and any defects.

@@ -1,25 +1,20 @@
 # FlashcardApp MVP status
 
-**2026-11-28 · Scope v3.0 · Step 2 documentation synchronization.** The approved v3.0
-scope has three P1 stories. [Implementation tasks](tasks.md)
+**2026-11-28 · Scope v3.0 · Phases 1 and 2 complete.** The tracker shows **23 of 35 tasks
+verified and approved**. The 12 remaining tasks are T024–T035 in Phases 3–6.
+[Implementation tasks](tasks.md)
 
-**Current phase: 2 — Database, repositories and shared foundations.** Phase 1 remains
-complete. Phase 2 needs four-table and set-scope revalidation before Phase 3. The next
-implementation task is **T006**. This documentation update supplies no new runtime evidence.
+**Awaiting explicit user approval to enter Phase 3.** The next task is **T024**.
 
 | Phase | ID range | Total | Verified and approved | Pending |
 | --- | --- | ---: | ---: | --- |
 | 1 · Project setup and shared configuration | T001–T005 | 5 | 5 | None |
-| 2 · Database, repositories and shared foundations | T006–T023 | 18 | 6 | T006, T009, T011–T013, T016–T018, T020–T023 (12) |
+| 2 · Database, repositories and shared foundations | T006–T023 | 18 | 18 | None |
 | 3 · Local Profiles & Navigation | T024–T026 | 3 | 0 | T024–T026 (3) |
 | 4 · Study Sets & Flashcards | T027–T030 | 4 | 0 | T027–T030 (4) |
 | 5 · Graded Study & Summary | T031–T033 | 3 | 0 | T031–T033 (3) |
 | 6 · Final Verification & Offline Demo | T034–T035 | 2 | 0 | T034–T035 (2) |
-| **Total** | **T001–T035** | **35** | **11** | **24** |
-
-The six still-approved Phase 2 tasks are T007, T008, T010, T014, T015 and T019. The other
-12 retain their original IDs and reopen for v3.0. After they are verified and approved,
-record the updated Phase 2 checkpoint and await explicit approval for Phase 3.
+| **Total** | **T001–T035** | **35** | **23** | **12** |
 
 ## Evidence and remaining work
 
@@ -29,6 +24,7 @@ record the updated Phase 2 checkpoint and await explicit approval for Phase 3.
 - **Phase 2 historical baseline:** 15 JVM and 22 instrumentation tests passed on
   WayDroid API 33 on 2026-11-24. The approved historical checkpoint remains intact.
   [Phase 2 foundation checkpoint](quickstart.md#phase-2-foundation-checkpoint)
-- **Pending v3.0 evidence:** the existing code, test fixtures and exported schema still
-  need the reopened Phase 2 work. The new build, schema, and suite results belong in the
-  [v3.0 verification record](quickstart.md#v30-verification-record).
+- **Phase 2 v3.0 checkpoint:** four-table Room v1 export verified, debug build succeeded,
+  and 15/15 JVM and 23/23 instrumentation tests passed with 0 skipped on the device suite.
+  The Supervisor and user approved all 12 reopened tasks.
+  [Phase 2 v3.0 checkpoint](quickstart.md#phase-2-v30-checkpoint)

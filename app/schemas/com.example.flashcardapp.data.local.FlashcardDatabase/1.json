@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "43f9a51a1328960ef91553174195fdd6",
+    "identityHash": "f4090c945947e676cea4597750c8defe",
     "entities": [
       {
         "tableName": "profiles",
@@ -35,7 +35,7 @@
         }
       },
       {
-        "tableName": "study_groups",
+        "tableName": "study_sets",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ownerId` INTEGER NOT NULL, `name` TEXT NOT NULL, `description` TEXT, FOREIGN KEY(`ownerId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
@@ -70,79 +70,13 @@
         },
         "indices": [
           {
-            "name": "index_study_groups_ownerId_id",
-            "unique": true,
-            "columnNames": [
-              "ownerId",
-              "id"
-            ],
-            "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_study_groups_ownerId_id` ON `${TABLE_NAME}` (`ownerId`, `id`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "profiles",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "ownerId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
-      },
-      {
-        "tableName": "study_sets",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ownerId` INTEGER NOT NULL, `name` TEXT NOT NULL, `groupId` INTEGER, `description` TEXT, FOREIGN KEY(`ownerId`) REFERENCES `profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`ownerId`, `groupId`) REFERENCES `study_groups`(`ownerId`, `id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ownerId",
-            "columnName": "ownerId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "groupId",
-            "columnName": "groupId",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "description",
-            "columnName": "description",
-            "affinity": "TEXT"
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": true,
-          "columnNames": [
-            "id"
-          ]
-        },
-        "indices": [
-          {
-            "name": "index_study_sets_ownerId_groupId",
+            "name": "index_study_sets_ownerId",
             "unique": false,
             "columnNames": [
-              "ownerId",
-              "groupId"
+              "ownerId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_study_sets_ownerId_groupId` ON `${TABLE_NAME}` (`ownerId`, `groupId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_study_sets_ownerId` ON `${TABLE_NAME}` (`ownerId`)"
           }
         ],
         "foreignKeys": [
@@ -154,19 +88,6 @@
               "ownerId"
             ],
             "referencedColumns": [
-              "id"
-            ]
-          },
-          {
-            "table": "study_groups",
-            "onDelete": "NO ACTION",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "ownerId",
-              "groupId"
-            ],
-            "referencedColumns": [
-              "ownerId",
               "id"
             ]
           }
@@ -327,7 +248,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '43f9a51a1328960ef91553174195fdd6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f4090c945947e676cea4597750c8defe')"
     ]
   }
 }

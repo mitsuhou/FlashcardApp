@@ -15,6 +15,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
@@ -43,7 +44,7 @@ class GradeCommitTest {
         openDatabase()
         profileId = db.profileDao().insertProfile(Profile(displayName = "A", createdAt = 0))
         val library = LibraryRepository(db.libraryDao())
-        setId = library.createSet(profileId, "Greetings", "", null)
+        setId = library.createSet(profileId, "Greetings", "")
         cardId = library.createCard(profileId, setId, "Hello", "Xin chào")
     }
 
@@ -54,7 +55,7 @@ class GradeCommitTest {
     }
 
     private suspend fun grade(card: Long, rating: ReviewGrade): Boolean =
-        review.submitGrade(profileId, "session", card, rating, setId, reviewedAt)
+        review.submitGrade(profileId, setId, "session", card, rating, reviewedAt)
 
     @Test
     fun failedScheduleUpdateRollsBackAndRetrySurvivesReopen() = runBlocking {
@@ -62,8 +63,8 @@ class GradeCommitTest {
         val forgotten = library.createCard(profileId, setId, "Thanks", "Cảm ơn")
         val outstanding = library.createCard(profileId, setId, "Goodbye", "Tạm biệt")
         assertTrue(grade(forgotten, ReviewGrade.FORGOT))
-        val original = requireNotNull(db.reviewDao().getCard(profileId, cardId))
-        val initialQueue = review.getEligibleCardIds(profileId, today)
+        val original = requireNotNull(db.reviewDao().getCard(profileId, setId, cardId))
+        val initialQueue = review.getEligibleCardIds(profileId, setId, today)
         val sqlite = db.openHelper.writableDatabase
         // Fail the second write only when the first write is visible inside the transaction.
         sqlite.execSQL("""
@@ -77,9 +78,9 @@ class GradeCommitTest {
         } catch (error: SQLiteConstraintException) {
             assertTrue(error.message.orEmpty().contains("test schedule failure"))
         }
-        assertEquals(original, db.reviewDao().getCard(profileId, cardId))
-        assertEquals(SessionCounts(0, 1), review.getSessionCounts(profileId, "session"))
-        assertEquals(initialQueue, review.getEligibleCardIds(profileId, today))
+        assertEquals(original, db.reviewDao().getCard(profileId, setId, cardId))
+        assertEquals(SessionCounts(0, 1), review.getSessionCounts(profileId, setId, "session"))
+        assertEquals(initialQueue, review.getEligibleCardIds(profileId, setId, today))
 
         sqlite.execSQL("DROP TRIGGER fail_schedule")
         assertTrue(grade(cardId, ReviewGrade.REMEMBERED))
@@ -87,11 +88,11 @@ class GradeCommitTest {
         db.close()
         openDatabase()
 
-        assertEquals(SessionCounts(1, 1), review.getSessionCounts(profileId, "session"))
+        assertEquals(SessionCounts(1, 1), review.getSessionCounts(profileId, setId, "session"))
         assertEquals(original.copy(stage = 1, dueDay = today.plusDays(1).toEpochDay()),
-            db.reviewDao().getCard(profileId, cardId))
-        assertEquals(listOf(outstanding), review.getEligibleCardIds(profileId, today))
-        assertEquals(listOf(cardId, forgotten, outstanding), review.getEligibleCardIds(profileId, today.plusDays(1)))
+            db.reviewDao().getCard(profileId, setId, cardId))
+        assertEquals(listOf(outstanding), review.getEligibleCardIds(profileId, setId, today))
+        assertEquals(listOf(cardId, forgotten, outstanding), review.getEligibleCardIds(profileId, setId, today.plusDays(1)))
     }
 
     @Test
@@ -107,11 +108,36 @@ class GradeCommitTest {
         assertTrue(remembered.await())
         assertTrue(forgot.await())
 
-        val counts = review.getSessionCounts(profileId, "session")
+        val counts = review.getSessionCounts(profileId, setId, "session")
         assertEquals(1, counts.remembered + counts.forgot)
-        val card = requireNotNull(db.reviewDao().getCard(profileId, cardId))
+        val card = requireNotNull(db.reviewDao().getCard(profileId, setId, cardId))
         val expectedStage = if (counts.remembered == 1) 1 else 0
         assertEquals(expectedStage, card.stage)
         assertEquals(today.plusDays(1).toEpochDay(), card.dueDay)
+    }
+
+    @Test
+    fun gradesAndSessionCountsRequireTheMatchingProfileAndSet() = runBlocking {
+        val library = LibraryRepository(db.libraryDao())
+        val otherSet = library.createSet(profileId, "Second set", "")
+        val otherProfile = db.profileDao().insertProfile(Profile(displayName = "B", createdAt = 0))
+        val original = requireNotNull(db.reviewDao().getCard(profileId, setId, cardId))
+
+        assertFalse(review.submitGrade(profileId, otherSet, "session", cardId, ReviewGrade.FORGOT, reviewedAt))
+        assertFalse(review.submitGrade(otherProfile, setId, "session", cardId, ReviewGrade.FORGOT, reviewedAt))
+        assertEquals(original, db.reviewDao().getCard(profileId, setId, cardId))
+        assertEquals(SessionCounts(0, 0), review.getSessionCounts(profileId, setId, "session"))
+
+        assertTrue(grade(cardId, ReviewGrade.REMEMBERED))
+        assertFalse(review.submitGrade(profileId, otherSet, "session", cardId, ReviewGrade.FORGOT, reviewedAt))
+        assertFalse(review.submitGrade(otherProfile, setId, "session", cardId, ReviewGrade.FORGOT, reviewedAt))
+        assertEquals(SessionCounts(0, 0), review.getSessionCounts(profileId, otherSet, "session"))
+        assertEquals(SessionCounts(0, 0), review.getSessionCounts(otherProfile, setId, "session"))
+        assertEquals(SessionCounts(0, 0), review.getSessionCounts(profileId, setId, "other-session"))
+
+        val otherCard = library.createCard(profileId, otherSet, "Thanks", "Cảm ơn")
+        assertTrue(review.submitGrade(profileId, otherSet, "session", otherCard, ReviewGrade.FORGOT, reviewedAt))
+        assertEquals(SessionCounts(1, 0), review.getSessionCounts(profileId, setId, "session"))
+        assertEquals(SessionCounts(0, 1), review.getSessionCounts(profileId, otherSet, "session"))
     }
 }

@@ -23,6 +23,6 @@ Runtime evidence belongs in the [quickstart](../quickstart.md#v30-verification-r
 | CHK016 | [x] | Labels, 48 dp touch targets, contrast, two font scales and orientations have concrete checks. | [Offline walkthrough](../quickstart.md#offline-course-demo) |
 | CHK017 | [x] | Focused JVM, Room, representative Compose and one offline walkthrough cover SC-01–SC-06. | [Acceptance index](../tasks.md#acceptance-and-scope-index), [Matrix](../quickstart.md#automated-acceptance-matrix) |
 
-- [ ] Verify and approve the updated Phase 2 checkpoint.
+- [x] Verify and approve the updated Phase 2 checkpoint.
 - [ ] Verify and approve the three story checkpoints.
 - [ ] Record the build, test and offline demo results for v3.0.

@@ -201,30 +201,30 @@ class ProfileSelectionTest {
         profiles.selectProfile(a)
         val dao = db.libraryDao()
         val library = LibraryRepository(dao)
-        val groupA = library.createGroup(a, "Shared", "")
-        val groupB = library.createGroup(b, "Shared", "")
+        val setA = library.createSet(a, "Shared", "")
+        val setB = library.createSet(b, "Shared", "")
         val started = CompletableDeferred<Unit>()
         val resume = CompletableDeferred<Unit>()
         val pausedDao = object : LibraryDao by dao {
-            override suspend fun updateGroup(profileId: Long, groupId: Long, name: String, description: String?): Int {
+            override suspend fun updateSet(profileId: Long, setId: Long, name: String, description: String?): Int {
                 started.complete(Unit)
                 resume.await()
-                return dao.updateGroup(profileId, groupId, name, description)
+                return dao.updateSet(profileId, setId, name, description)
             }
         }
         val origin = requireNotNull(profiles.selectedProfileId.first())
-        val write = async { LibraryRepository(pausedDao).updateGroup(origin, groupA, "Edited by A", "") }
+        val write = async { LibraryRepository(pausedDao).updateSet(origin, setA, "Edited by A", "") }
         withTimeout(10_000) { started.await() }
         profiles.selectProfile(b)
         val active = requireNotNull(profiles.selectedProfileId.first())
         assertEquals(b, active)
-        assertNull(library.observeGroup(active, groupA).first())
-        assertFalse(library.updateGroup(active, groupA, "Edited by B", ""))
+        assertNull(library.observeSet(active, setA).first())
+        assertFalse(library.updateSet(active, setA, "Edited by B", ""))
         resume.complete(Unit)
         assertTrue(write.await())
 
-        assertEquals("Edited by A", library.observeGroup(a, groupA).first()?.name)
-        assertEquals("Shared", library.observeGroup(b, groupB).first()?.name)
-        assertEquals(listOf(groupB), library.observeGroups(b).first().map { it.id })
+        assertEquals("Edited by A", library.observeSet(a, setA).first()?.name)
+        assertEquals("Shared", library.observeSet(b, setB).first()?.name)
+        assertEquals(listOf(setB), library.observeSets(b, 0L).first().map { it.id })
     }
 }

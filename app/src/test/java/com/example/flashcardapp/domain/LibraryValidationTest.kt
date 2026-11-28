@@ -21,12 +21,12 @@ class LibraryValidationTest {
     }
 
     @Test
-    fun groupAndSetNames_acceptOneThroughEightyCharactersAfterTrimming() {
-        assertFalse(isValidGroupOrSetName(""))
-        assertFalse(isValidGroupOrSetName(" \t\n"))
-        assertTrue(isValidGroupOrSetName(" A "))
-        assertTrue(isValidGroupOrSetName(" " + "a".repeat(80) + "\n"))
-        assertFalse(isValidGroupOrSetName("a".repeat(81)))
+    fun setNames_acceptOneThroughEightyCharactersAfterTrimming() {
+        assertFalse(isValidSetName(""))
+        assertFalse(isValidSetName(" \t\n"))
+        assertTrue(isValidSetName(" A "))
+        assertTrue(isValidSetName(" " + "a".repeat(80) + "\n"))
+        assertFalse(isValidSetName("a".repeat(81)))
     }
 
     @Test
@@ -61,7 +61,7 @@ class LibraryValidationTest {
         val names = listOf("Biology", "Biology")
         val faces = listOf("Cell", "Cell")
 
-        assertTrue(names.all { isValidGroupOrSetName(it) })
+        assertTrue(names.all { isValidSetName(it) })
         assertTrue(faces.all { isValidCardFace(it) })
     }
 }

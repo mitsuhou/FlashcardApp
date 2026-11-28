@@ -13,21 +13,14 @@ import androidx.room.PrimaryKey
             parentColumns = ["id"],
             childColumns = ["ownerId"],
             onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = StudyGroup::class,
-            parentColumns = ["ownerId", "id"],
-            childColumns = ["ownerId", "groupId"],
-            onDelete = ForeignKey.NO_ACTION
         )
     ],
-    indices = [Index(value = ["ownerId", "groupId"])]
+    indices = [Index(value = ["ownerId"])]
 )
 data class StudySet(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val ownerId: Long,
     val name: String,
-    val groupId: Long? = null,
     val description: String? = null
 )

@@ -11,20 +11,20 @@ import java.time.ZonedDateTime
 import kotlinx.coroutines.flow.Flow
 
 class ReviewRepository(private val reviewDao: ReviewDao) {
-    fun observeReviewCounts(profileId: Long, today: LocalDate, setId: Long? = null): Flow<ReviewCounts> =
-        reviewDao.observeReviewCounts(profileId, today.toEpochDay(), setId)
+    fun observeReviewCounts(profileId: Long, setId: Long, today: LocalDate): Flow<ReviewCounts> =
+        reviewDao.observeReviewCounts(profileId, setId, today.toEpochDay())
 
     // Read once at review start. An empty list keeps the learner at the entry screen.
-    suspend fun getEligibleCardIds(profileId: Long, today: LocalDate, setId: Long? = null): List<Long> =
-        reviewDao.getEligibleCardIds(profileId, today.toEpochDay(), setId)
+    suspend fun getEligibleCardIds(profileId: Long, setId: Long, today: LocalDate): List<Long> =
+        reviewDao.getEligibleCardIds(profileId, setId, today.toEpochDay())
 
     suspend fun getEligibleCard(
         profileId: Long,
+        setId: Long,
         cardId: Long,
-        today: LocalDate,
-        setId: Long? = null
+        today: LocalDate
     ): Flashcard? {
-        val card = reviewDao.getCard(profileId, cardId, setId) ?: return null
+        val card = reviewDao.getCard(profileId, setId, cardId) ?: return null
         val dueDate = card.dueDay?.let(LocalDate::ofEpochDay)
         return if (isEligibleForReview(dueDate, today)) card else null
     }
@@ -33,10 +33,10 @@ class ReviewRepository(private val reviewDao: ReviewDao) {
     // False means the card is unavailable. Storage failures propagate to the caller.
     suspend fun submitGrade(
         profileId: Long,
+        setId: Long,
         sessionId: String,
         cardId: Long,
         grade: ReviewGrade,
-        setId: Long? = null,
         reviewedAt: ZonedDateTime = ZonedDateTime.now()
     ): Boolean = reviewDao.submitGrade(
         profileId = profileId,
@@ -48,6 +48,6 @@ class ReviewRepository(private val reviewDao: ReviewDao) {
         reviewDate = reviewedAt.toLocalDate()
     )
 
-    suspend fun getSessionCounts(profileId: Long, sessionId: String): SessionCounts =
-        reviewDao.getSessionCounts(profileId, sessionId)
+    suspend fun getSessionCounts(profileId: Long, setId: Long, sessionId: String): SessionCounts =
+        reviewDao.getSessionCounts(profileId, setId, sessionId)
 }
