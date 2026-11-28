@@ -1,20 +1,21 @@
 # FlashcardApp MVP status
 
-**2026-11-28 · Scope v3.0 · Phases 1 and 2 complete.** The tracker shows **23 of 35 tasks
-verified and approved**. The 12 remaining tasks are T024–T035 in Phases 3–6.
+**2026-11-28 · Scope v3.0 · Phases 1 and 2 complete.** The tracker shows **23 of 39 tasks
+verified and approved**. The 16 remaining tasks are T024–T039 in Phases 3–6.
 [Implementation tasks](tasks.md)
 
-**Awaiting explicit user approval to enter Phase 3.** The next task is **T024**.
+**Awaiting Supervisor and user approval of the UI-first plan before starting Phase 3.**
+The next task is **T024**, Profile UI only. T025 starts after the user approves that UI.
 
 | Phase | ID range | Total | Verified and approved | Pending |
 | --- | --- | ---: | ---: | --- |
 | 1 · Project setup and shared configuration | T001–T005 | 5 | 5 | None |
 | 2 · Database, repositories and shared foundations | T006–T023 | 18 | 18 | None |
 | 3 · Local Profiles & Navigation | T024–T026 | 3 | 0 | T024–T026 (3) |
-| 4 · Study Sets & Flashcards | T027–T030 | 4 | 0 | T027–T030 (4) |
-| 5 · Graded Study & Summary | T031–T033 | 3 | 0 | T031–T033 (3) |
-| 6 · Final Verification & Offline Demo | T034–T035 | 2 | 0 | T034–T035 (2) |
-| **Total** | **T001–T035** | **35** | **23** | **12** |
+| 4 · Study Sets & Flashcards | T027–T033 | 7 | 0 | T027–T033 (7) |
+| 5 · Graded Study & Summary | T034–T037 | 4 | 0 | T034–T037 (4) |
+| 6 · Final Verification & Offline Demo | T038–T039 | 2 | 0 | T038–T039 (2) |
+| **Total** | **T001–T039** | **39** | **23** | **16** |
 
 ## Evidence and remaining work
 

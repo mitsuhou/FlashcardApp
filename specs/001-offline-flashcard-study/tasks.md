@@ -1,6 +1,6 @@
 # Tasks — Offline flashcard study and scheduled review
 
-**Release baseline**: v3.0 · 35 tasks, including 12 in Phases 3–6.
+**Release baseline**: v3.0 · 39 tasks, including 16 in Phases 3–6.
 Follow the [specification](spec.md), [plan](plan.md), [data model](data-model.md) and
 [verification guide](quickstart.md). Paths are relative to the repository root.
 
@@ -44,45 +44,69 @@ approval before starting T024 in Phase 3. [Phase 2 v3.0 checkpoint](quickstart.m
 
 ## Phase 3 — Local Profiles & Navigation
 
-- [ ] T024 [US3] Implement `ProfileViewModel.kt` and `ProfileScreen.kt` in `app/src/main/java/com/example/flashcardapp/ui/profile/`. Expose creation, selector, active and retry states, create and select separately, and support rename and confirmed deletion with retained input (FR-01, FR-02, FR-12, UI-01).
-- [ ] T025 [US3] Wire `MainActivity.kt`, `AppViewModelFactory.kt` and `ui/navigation/FlashcardNavHost.kt` under `app/src/main/java/com/example/flashcardapp/`. Gate owned destinations on validated selection, navigate directly to the selected profile's Set List route, and clear the previous stack, drafts, session and observations on switch. Connect live Set List content in T027 (FR-01, FR-02, UI-01, UI-03).
-- [ ] T026 [US3] Add representative profile ViewModel and Compose checks in the existing test roots under `ui/profile/`. Exercise first-run creation or switching, validated routing into Set List and Back isolation. Cover loading, recovery and one-survivor behavior at the ViewModel/data boundary (SC-01, UI-01).
+**Goal and check.** Approve Profile UI, then use the Set List placeholder to verify first
+selection, restored selection, recovery and Back isolation.
+
+- [ ] T024 [US3] Build only the stateless Compose content in `app/src/main/java/com/example/flashcardapp/ui/profile/ProfileScreen.kt` with display data and callbacks. Show loading, empty creation, the profile list with an active marker, retry and write feedback. Keep input drafts and named delete confirmation in Compose with `rememberSaveable`. Use inline create and rename controls and explain what profile deletion removes. Add labels to `app/src/main/res/values/strings.xml`, use `secondary` or a foreground with at least 4.5:1 contrast on dark backgrounds and add Compose `@Preview` under `FlashcardAppTheme` for the main states. Stop for UI approval (FR-01, FR-02, FR-12, NFR-04, UI-01).
+- [ ] T025 [US3] After T024 approval, implement `app/src/main/java/com/example/flashcardapp/ui/profile/ProfileViewModel.kt` with small sealed Loading, Error and Ready states, simple `Flow` reads and direct `viewModelScope.launch` writes. Keep creation and selection separate and keep dialog state in Compose. Register it in `AppViewModelFactory.kt` and connect `MainActivity.kt` and `ui/navigation/FlashcardNavHost.kt`. Collect state with lifecycle awareness, gate owned routes on validated selection and clear the previous stack, drafts, session and observations on switch. Provide a Set List placeholder under the validated profile with a profile-management entry. T028 supplies the live content (FR-01, FR-02, FR-12, UI-01, UI-03).
+- [ ] T026 [US3] Write and run Phase 3 ViewModel tests in `app/src/test/java/com/example/flashcardapp/ui/profile/` and Compose tests in `app/src/androidTest/java/com/example/flashcardapp/ui/profile/`. Cover loading, read recovery, explicit selection including one-survivor recovery, first-run creation or switching, and Back isolation using the validated Set List placeholder. Record the Phase 3 checkpoint before requesting Phase 4 approval (SC-01, UI-01).
 
 ## Phase 4 — Study Sets & Flashcards
 
-- [ ] T027 [US2] Implement and connect `SetListViewModel.kt` and `SetListScreen.kt` under `app/src/main/java/com/example/flashcardapp/ui/library/`. Show the active profile, owned sets in stable order, total and eligible counts, Create set and the profile control. Refresh counts on local day changes when returning to the foreground (FR-02, FR-04, FR-10, UI-03).
-- [ ] T028 [US2] Implement and connect `SetDetailViewModel.kt` and `SetDetailScreen.kt` in `ui/library/`. Show metadata, counts, editable card rows and saved next dates. Offer add/edit/deletion actions and a Start study entry for T031–T032. Refresh eligibility after data changes and foreground return (FR-04, FR-05, FR-09, FR-10, UI-06).
-- [ ] T029 [US2] Implement and connect shared `EditorViewModel.kt` and `EditorScreen.kt` in `ui/library/`. Wire set and card create/edit, labeled errors, save and return to parent, draft retention on failure/rotation and named discard/deletion confirmations (FR-04, FR-05, FR-12, UI-05).
-- [ ] T030 [US2] Add representative library/editor Compose tests in `app/src/androidTest/java/com/example/flashcardapp/ui/library/`. Check scoped Set List and stale routes, invalid input, save/return and count refresh after a local day changes without a Room write. Use the Phase 2 tests for field boundaries and deletion cascades (SC-01, SC-02, SC-03, SC-05).
+**Goal and check.** Approve and connect Set List, Set Detail and the shared editor in that
+order. Verify owned routes, field validation, counts and saved dates.
+
+- [ ] T027 [US2] Build only stateless `app/src/main/java/com/example/flashcardapp/ui/library/SetListScreen.kt`. Show the active profile, owned sets in stable order, total and eligible counts, Create set and the profile control. Render loading, empty, error and populated states from inputs and expose callbacks. Update `app/src/main/res/values/strings.xml` and add Compose `@Preview` under `FlashcardAppTheme`. Stop for UI approval (FR-02, FR-04, FR-10, UI-03).
+- [ ] T028 [US2] After T027 approval, implement `app/src/main/java/com/example/flashcardapp/ui/library/SetListViewModel.kt` using owned set projections. Register it in `AppViewModelFactory.kt` and pass `createSavedStateHandle()` when the route supplies a profile ID, following Inventory. Replace the placeholder with the live Set List route in `ui/navigation/FlashcardNavHost.kt`. Validate its owner against the active profile, fall back safely for stale IDs and refresh counts after local day changes on foreground return. Leave Set Detail and Create set integration to T030 and T032 (FR-02, FR-04, FR-10, UI-03).
+- [ ] T029 [US2] Build only stateless `app/src/main/java/com/example/flashcardapp/ui/library/SetDetailScreen.kt`. Show metadata, counts, card rows, saved next dates and callbacks for add, edit, delete and Start study. Include loading, empty, error and no-eligible-card states, and keep named delete confirmation in Compose. Update `app/src/main/res/values/strings.xml` and add Compose `@Preview` under `FlashcardAppTheme`. Stop for UI approval (FR-04, FR-05, FR-09, FR-10, UI-06).
+- [ ] T030 [US2] After T029 approval, implement `app/src/main/java/com/example/flashcardapp/ui/library/SetDetailViewModel.kt`, register it in `AppViewModelFactory.kt` with `createSavedStateHandle()` for route IDs, and connect Set List to Set Detail in `ui/navigation/FlashcardNavHost.kt`. Read only the active profile's set and cards. Fall back to the validated profile's Set List or the profile selector for stale IDs. Refresh eligibility on data changes and foreground return and handle confirmed set deletion. Keep editor and study entry callbacks for T032 and T036 (FR-02, FR-04, FR-05, FR-09, FR-10, UI-06).
+- [ ] T031 [US2] Build only the shared stateless Compose content in `app/src/main/java/com/example/flashcardapp/ui/library/EditorScreen.kt` for set and card forms. Keep drafts and named discard or deletion confirmations in Compose with `rememberSaveable`. Show field errors and saving feedback, retain draft input after a failed save, and expose save, cancel and confirm callbacks. Update `app/src/main/res/values/strings.xml` and add Compose `@Preview` under `FlashcardAppTheme` for both forms and their key states. Stop for UI approval (FR-04, FR-05, FR-12, UI-05).
+- [ ] T032 [US2] After T031 approval, implement `app/src/main/java/com/example/flashcardapp/ui/library/EditorViewModel.kt` for scoped reads, shared validation and set/card writes, using the canonical field rules in [data-model.md](data-model.md#validation-and-mutations) for `StudySet.name`, `StudySet.description`, `Flashcard.front` and `Flashcard.back`. Register it in `AppViewModelFactory.kt` with `createSavedStateHandle()` for route IDs. Connect set and card create/edit routes in `ui/navigation/FlashcardNavHost.kt`. Return to the valid parent after save or discard, and fall back to the validated Set List or profile selector when the target or parent is stale or outside the active profile (FR-02, FR-04, FR-05, FR-12, UI-05).
+- [ ] T033 [US2] Write and run Phase 4 Compose tests in `app/src/androidTest/java/com/example/flashcardapp/ui/library/`. Exercise the live scoped Set List, stale routes, one invalid editor input, save/return, draft preservation and count refresh on a new local day without a Room write. Use Phase 2 storage tests for field boundaries and cascades. Record the checkpoint before requesting Phase 5 approval (SC-01, SC-02, SC-03, SC-05).
 
 ## Phase 5 — Graded Study & Summary
 
-- [ ] T031 [US1] Implement `GradedStudyViewModel.kt` and `GradedStudyScreen.kt` in `app/src/main/java/com/example/flashcardapp/ui/study/`. Keep an immutable one-set snapshot with original positions and rotation-safe state. Handle empty start and unavailable cards, explicit reveal and ratings, atomic save/retry, blocked Exit/Back while saving and early-exit confirmation (FR-08–FR-10, FR-12, UI-09).
-- [ ] T032 [US1] Implement `ReviewSummaryScreen.kt` in `ui/study/` and connect Set Detail → Graded Study → Review Summary → originating Set Detail in `FlashcardNavHost.kt`. Register the study ViewModel in the existing factory. Query committed counts with the captured profile, set and session. Show no percentage at zero reviews (FR-09, FR-11, FR-12, UI-10).
-- [ ] T033 [US1] Add focused study ViewModel and Compose tests under `ui/study/` in the existing test roots. Cover queue slots and reveal gating, no grade command on recomposition, saving/blocked Back, rollback and retry, empty entry and return after a committed or zero-grade summary (SC-03, SC-04, UI-09, UI-10).
+**Goal and check.** Approve Graded Study before implementing its ViewModel. Approve Review
+Summary before connecting the flow. Verify reveal, durable grading, retry and return to the
+originating set.
+
+- [ ] T034 [US1] Build only stateless `app/src/main/java/com/example/flashcardapp/ui/study/GradedStudyScreen.kt`. Show the face, original queue position, committed count, Flip, reveal-gated ratings and saving/retry feedback. Expose actions as callbacks and keep exit confirmation visibility in Compose. Update `app/src/main/res/values/strings.xml` and add Compose `@Preview` under `FlashcardAppTheme` for the main states. Stop for UI approval (FR-08, FR-09, FR-12, NFR-04, UI-09).
+- [ ] T035 [US1] After T034 approval, implement `app/src/main/java/com/example/flashcardapp/ui/study/GradedStudyViewModel.kt` with small sealed screen states. Capture one set's frozen queue, session and profile IDs. Preserve the original positions, face and reveal state across rotation. Handle empty start, unavailable cards, explicit reveal, atomic grade submission, retry and blocked Exit/Back while saving. Keep exit confirmation state in Compose. Expose committed counts queried with the originating profile, set and session. T036 registers this ViewModel and connects its route (FR-08–FR-12, UI-09).
+- [ ] T036 [US1] First build only stateless `app/src/main/java/com/example/flashcardapp/ui/study/ReviewSummaryScreen.kt`. Show committed counts, recall percentage when defined and a Done callback. Update `app/src/main/res/values/strings.xml` and add Compose `@Preview` under `FlashcardAppTheme` for committed and zero-grade summaries. Stop for explicit UI approval without marking T036 complete. After UI approval, register `GradedStudyViewModel` in `AppViewModelFactory.kt` and use `createSavedStateHandle()` for route arguments. Connect Set Detail → Graded Study → Review Summary → originating Set Detail in `ui/navigation/FlashcardNavHost.kt`. Keep an empty start on Set Detail, block Back and Exit during grading, and use the originating study state for summary results. Verify the full wiring before submitting T036 for task approval (FR-08–FR-12, UI-09, UI-10).
+- [ ] T037 [US1] Write and run Phase 5 ViewModel tests in `app/src/test/java/com/example/flashcardapp/ui/study/` and Compose tests in `app/src/androidTest/java/com/example/flashcardapp/ui/study/`. Cover frozen queue slots, reveal gating, no grade triggered by recomposition, saving and blocked Back, rollback and retry, empty entry, and return for both committed and zero-grade summaries. Record the checkpoint before requesting Phase 6 approval (SC-03, SC-04, UI-09, UI-10).
 
 ## Phase 6 — Final Verification & Offline Demo
 
-- [ ] T034 Run debug build, JVM and device suites from the [quickstart](quickstart.md#prepare-and-build). Check the schema export, merged release manifest and a short API 24 study/calendar smoke. Record results, devices and outstanding issues (NFR-02, NFR-06, NFR-07, NFR-09).
-- [ ] T035 Run the [airplane-mode walkthrough](quickstart.md#offline-course-demo) on a clean installation. Verify profile isolation, set and card editing, grading, summary, restart, deletion, rotation and reachable controls at both orientations and font scales. Check rendered contrast and touch target sizes and record SC-01–SC-06 evidence (NFR-01, NFR-03–NFR-05, NFR-09).
+- [ ] T038 Run the debug build and all JVM and Android test suites from [quickstart.md](quickstart.md#prepare-and-build). Check the Room export in `app/schemas/`, merged release manifest and a short API 24 study/calendar smoke. Record results, devices and outstanding issues in `quickstart.md` (NFR-02, NFR-06, NFR-07, NFR-09).
+- [ ] T039 Run the [offline walkthrough](quickstart.md#offline-course-demo) on a clean installation and record SC-01–SC-06 results in `quickstart.md`. Verify profile isolation, editing, grading, summary, restart, deletion, rotation and reachable controls at 100% and 130% font scale in portrait and landscape. Measure rendered contrast and touch targets and record approval of the final checkpoint (NFR-01, NFR-03–NFR-05, NFR-09).
 
 ## Dependencies and approvals
 
-Complete phases and tasks in ID order. Explain the approach and applicable course sample
-before implementation, run relevant checks, and stop after each task for approval. Mark a
-task complete only after verification and approval. At each phase checkpoint update
-[current.md](current.md), this list and [quickstart.md](quickstart.md), then wait for explicit
-approval before the next phase. Follow [AGENTS.md](../../AGENTS.md).
+Complete phases and tasks in ID order. Before code, explain the approach and the applicable
+course samples. Verify and stop after each task for approval. For each screen, the user must
+approve the UI and its themed previews before ViewModel or route wiring begins. T036 has an
+explicit UI stop and integration approval under one task ID. Wait for user approval of the
+UI before resuming T036 for wiring. Mark a task complete only after verification and approval.
+
+Use `AppViewModelFactory.kt` for screen ViewModels, `createSavedStateHandle()` for route
+arguments, and `ui/navigation/FlashcardNavHost.kt` for route wiring. Every screen UI task
+includes strings in `app/src/main/res/values/strings.xml` and Compose `@Preview` in
+`FlashcardAppTheme`. Follow [AGENTS.md](../../AGENTS.md). At each phase checkpoint, record
+evidence in [quickstart.md](quickstart.md) and update [current.md](current.md) and this list
+before requesting explicit approval of the next phase.
+
+The completed T004 entry retains its historical reference to T035. Under this plan, T039
+owns rendered-control measurements.
 
 ## Acceptance and scope index
 
 | Scope | Requirements and business rules | Tasks |
 | --- | --- | --- |
-| US3 · Local Profiles · SC-01, SC-05 | FR-01, FR-02, FR-12 · BR-01, BR-02, BR-06 · UI-01, UI-03 | T006, T008, T011, T014–T015, T020–T021, T024–T027, T030, T035 |
-| US2 · Sets & Cards · SC-01, SC-02, SC-05 | FR-04, FR-05, FR-10, FR-12 · BR-03, BR-05, BR-06, BR-07 · UI-03, UI-05, UI-06 | T006, T009–T011, T013, T016, T020, T027–T030, T035 |
-| US1 · Graded Study · SC-03, SC-04 | FR-08, FR-09, FR-10, FR-11, FR-12 · BR-10, BR-11, BR-12, BR-13 · UI-06, UI-09, UI-10 | T007, T010, T012, T017–T018, T022–T023, T028, T031–T035 |
-| Release and offline · SC-01 | NFR-01, NFR-02, NFR-07, NFR-09 | T003, T005, T013, T019–T023, T034–T035 |
-| Screen usability and accessibility · SC-06 | NFR-03, NFR-04, NFR-05 | T004, T024–T033, T035 |
-| Maintainability and reliable writes | NFR-06, NFR-08 | T001–T002, T006–T007, T013, T018–T019, T023, T029, T031, T033–T034 |
+| US3 · Local Profiles · SC-01, SC-05 | FR-01, FR-02, FR-12 · BR-01, BR-02, BR-06 · UI-01, UI-03 | T006, T008, T011, T014–T015, T020–T021, T024–T026, T028, T033, T039 |
+| US2 · Sets & Cards · SC-01, SC-02, SC-05 | FR-04, FR-05, FR-10, FR-12 · BR-03, BR-05, BR-06, BR-07 · UI-03, UI-05, UI-06 | T006, T009–T011, T013, T016, T020, T027–T033, T039 |
+| US1 · Graded Study · SC-03, SC-04 | FR-08, FR-09, FR-10, FR-11, FR-12 · BR-10, BR-11, BR-12, BR-13 · UI-06, UI-09, UI-10 | T007, T010, T012, T017–T018, T022–T023, T029–T030, T034–T037, T039 |
+| Release and offline · SC-01 | NFR-01, NFR-02, NFR-07, NFR-09 | T003, T005, T013, T019–T023, T038–T039 |
+| Screen usability and accessibility · SC-06 | NFR-03, NFR-04, NFR-05 | T004, T024, T027, T029, T031, T034, T036, T039 |
+| Maintainability and reliable writes | NFR-06, NFR-08 | T001–T002, T006–T007, T013, T018–T019, T023, T025, T028, T030, T032, T035–T038 |
 
 See [spec.md](spec.md#requirements-and-traceability) for reserved and deferred requirement IDs.

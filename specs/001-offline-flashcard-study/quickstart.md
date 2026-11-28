@@ -54,7 +54,7 @@ adb shell getprop ro.build.version.sdk
 Use a connected target reported as `device`. Check actual test cases and counts in
 `app/build/reports/tests/` and `app/build/reports/androidTests/connected/`.
 Inspect the four-table v1 JSON and merged manifest for release backup exclusions and
-unnecessary network or shared-storage permissions. For T034, run a short API 24 smoke of the
+unnecessary network or shared-storage permissions. For T038, run a short API 24 smoke of the
 implemented calendar path. With a stage-1 card rated Remembered on November 24 at a fixed
 local date, expect stage 2 and a November 27 due date after reopen. Record the device/API.
 The course device may be the same device or a separate one.
@@ -66,9 +66,9 @@ The course device may be the same device or a separate one.
 | 1 · T001–T005 | Approved historical starter build, tests, manifest and API 24 launch above. |
 | 2 · T006–T023 | Four-table Room export, application/container wiring and focused JVM/Room suites. Check profile isolation, cascades, persisted selection, required set scope and atomic grade durability. |
 | 3 · T024–T026 | Profile UI, validated selection into the Set List route, recovery and Back after switching. |
-| 4 · T027–T030 | Owned Set List and Set Detail, the shared editor, validation and count refresh on a new local day. |
-| 5 · T031–T033 | Single-set study, answer reveal, save/retry, summary totals and return to Set Detail. |
-| 6 · T034–T035 | Debug build and suite results, merged manifest and API 24 smoke, plus the offline demo and accessibility observations. |
+| 4 · T027–T033 | Owned Set List and Set Detail, the shared editor, validation and count refresh on a new local day. |
+| 5 · T034–T037 | Single-set study, answer reveal, save/retry, summary totals and return to Set Detail. |
+| 6 · T038–T039 | Debug build and suite results, merged manifest and API 24 smoke, plus the offline demo and accessibility observations. |
 
 Record the relevant checks at each checkpoint and obtain approval before starting the next phase.
 
@@ -82,8 +82,8 @@ edge cases at the rules and storage boundaries and keep Compose checks represent
 | JVM rules and validation | Check all Remembered intervals and cap, Forgot, overdue and calendar boundaries, and zero/rounded summaries. Check blank, exact and over-limit set names and card faces, and trim or clear the set description. | T006–T007 · SC-02–SC-04 · NFR-06, NFR-08 |
 | Room and DataStore | With separate profiles and identically named sets, try stale IDs and complete a started write after switching. Reopen files and verify selection recovery and exactly scoped profile/set/card cascades. Verify saved descriptions and schedule/history preservation on edits. | T020–T021 · SC-01, SC-02, SC-05 · NFR-02 |
 | Room study | Seed multiple sets and profiles and check target-set counts, empty queue, date/ID ordering, future and forgotten cards, and eligibility on a new local day. Verify wrong-set and wrong-profile reads/writes, including zero summary contribution. Force a rollback, retry and submit competing grades. Reopen and verify the committed result. | T022–T023 · SC-03, SC-04 · NFR-02, NFR-08 |
-| Profile and library UI | Exercise profile creation or switching and Back isolation, one invalid editor input, save/return and a count refresh without a database write. Check actual scope when live Set List is connected. | T026, T030 · SC-01–SC-03 · NFR-03, NFR-08 |
-| Study ViewModel and Compose | Check answer reveal, frozen positions and skip, no grade triggered by recomposition, Exit/Back blocked during save, failure/retry, empty entry and Summary → Set Detail. Use a committed summary and a zero-grade case. | T033 · SC-03, SC-04 · NFR-03, NFR-08 |
+| Profile and library UI | Exercise profile creation or switching and Back isolation, one invalid editor input, save/return and a count refresh without a database write. Check actual scope when live Set List is connected. | T026, T033 · SC-01–SC-03 · NFR-03, NFR-08 |
+| Study ViewModel and Compose | Check answer reveal, frozen positions and skip, no grade triggered by recomposition, Exit/Back blocked during save, failure/retry, empty entry and Summary → Set Detail. Use a committed summary and a zero-grade case. | T037 · SC-03, SC-04 · NFR-03, NFR-08 |
 
 ## Offline course demo
 

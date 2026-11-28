@@ -7,7 +7,7 @@ Runtime evidence belongs in the [quickstart](../quickstart.md#v30-verification-r
 | --- | --- | --- | --- |
 | CHK001 | [x] | All three P1 stories and six screens are in scope, with deferred requirements outside v1. | [Spec](../spec.md) |
 | CHK002 | [x] | Offline behavior, architecture and quality gates satisfy all constitutional principles. | [Constitution check](../plan.md#constitution-check) |
-| CHK003 | [x] | Existing foundation IDs remain in order with only impacted tasks reopened. Story and final verification tasks total 12. | [Tasks](../tasks.md), [Tracker](../current.md) |
+| CHK003 | [x] | T001–T023 remain complete and in order. The 16 story and final verification tasks T024–T039 bring the total to 39. | [Tasks](../tasks.md), [Tracker](../current.md) |
 | CHK004 | [x] | Historical results and pending v3.0 runtime checks have clear dates, devices and evidence targets. | [Quickstart](../quickstart.md) |
 | CHK005 | [x] | Valid selection opens Set List. Invalid selection, including with one survivor, requires a choice. Zero profiles opens creation. | [Profile and library rules](../../../docs/4-Business-Rules.md#2-profile-and-library), [Profile routes](../plan.md#profile-selection-and-routes) |
 | CHK006 | [x] | Stale IDs and in-flight writes preserve profile isolation. Every study operation requires the originating set. | [Set-scoped queries](../data-model.md#set-scoped-study-queries) |

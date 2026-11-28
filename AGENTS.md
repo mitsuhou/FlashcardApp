@@ -33,6 +33,26 @@ Use the relevant pathways, codelabs and sample apps.
 ## Coding Standards
 
 - Write simple, beginner-friendly Kotlin.
+- The coding style should be stable between files.
+- Prefer explicit `if` / `else`, `when`, and clear local variable names. Avoid
+  overusing `takeIf`, `takeUnless`, `let`, `run`, `apply`, `also`, `with`, and
+  infix `to` for a `Pair`.
+- Keep Compose screen content stateless with data and callback parameters. Keep
+  UI-only state such as text drafts, dialog visibility, and delete confirmation
+  in the composable with `rememberSaveable`, following Inventory's
+  `ItemDetailsScreen.kt`. Use inline forms and actions when they meet the
+  requirement.
+- Keep ViewModel UI state small. Use a sealed interface for mutually exclusive
+  screen states such as Loading, Error, and Ready, following Mars Photos.
+- Use course-level coroutines. Observe data with `Flow` and use `stateIn` when
+  useful. Launch writes directly with `viewModelScope.launch`. Avoid manually
+  managed `Job`, `suspend () -> Boolean` wrappers, `flatMapLatest`,
+  `MutableSharedFlow`, and `channelFlow` unless necessary.
+- Give every screen Compose `@Preview` functions for its main states using
+  `FlashcardAppTheme`. For text, labels, and `TextButton` on dark surfaces,
+  use `MaterialTheme.colorScheme.secondary` or a text color that reaches at
+  least 4.5:1 under NFR-04. Reserve primary Indigo for uses such as a filled
+  button background and use an approved foreground on Navy and CardSurface.
 - Follow the architecture and patterns taught in the course.
 - Use simple MVVM, Room, Repository and manual DI.
 - Prefer explicit functions and direct DAO injection.
@@ -48,6 +68,17 @@ Use the relevant pathways, codelabs and sample apps.
 
 - Read current.md and the relevant SDD documents first.
 - Implement exactly one task at a time.
+- For each new screen, first do one UI-only task with stateless Jetpack Compose
+  content, `app/src/main/res/values/strings.xml`, and themed previews for its
+  main states. Stop and get explicit user approval of the UI before starting
+  the ViewModel and navigation task.
+- After UI approval, implement the screen's ViewModel when needed, register it
+  in `AppViewModelFactory.kt`, pass `createSavedStateHandle()` for route
+  arguments following Inventory, and connect its route in
+  `ui/navigation/FlashcardNavHost.kt`.
+- T036 reserves both Review Summary UI and study navigation under one ID. Stop
+  after its UI-only work and wait for explicit user approval before wiring.
+  Complete T036 only after its wiring is verified and approved.
 - Follow task order and dependencies.
 - Explain the intended approach before writing code.
 - Run relevant tests.
