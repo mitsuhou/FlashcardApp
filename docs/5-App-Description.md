@@ -1,74 +1,64 @@
 # Application Description & Screen Behavior
 
-Version 1.1 — product-facing description. See Functional Requirements for scope and Business Rules for policy.
+Version 3.0 — six screen types for one offline study flow.
 
-## 1. Navigation structure
+## 1. Navigation
 
 ```mermaid
 flowchart TD
-    P[Profile selection] --> H[Home]
-    H --> L[Library]
-    H --> S[Profile and settings]
-    L --> G[Group detail]
-    L --> D[Set detail]
-    G --> D
-    D --> E[Card editor]
-    D --> F[Free Study]
-    D --> R[Graded Review]
-    H --> R
-    R --> T[Review summary]
-    S --> P
+    P[Profile Selection / Management] --> L[Set List]
+    L --> D[Set Detail]
+    L -->|New set| E[Set / Card Editor]
+    D -->|Edit set or manage cards| E
+    D -->|Start study| R[Graded Study]
+    R -->|Completed or confirmed early exit| S[Review Summary]
+    S -->|Done| D
 ```
 
-Primary navigation: Home, Library, Profile/Settings. P2 progress may live on Home or Profile, without a separate tab. Editor and study destinations use a normal back stack; active profile changes reset it. Top-level navigation is hidden during focused study.
+After an explicit profile selection or restoration of a valid saved profile, open Set List.
+Set List offers the profile control for selection and management. Switching profiles opens
+the new Set List with a fresh back stack. The shared editor returns to its parent after save
+or confirmed discard. Set Detail is the entry point for Graded Study.
 
-## 2. Screen inventory and behavior
+## 2. Screen inventory
 
 | ID | Screen | Main content and actions | Requirements |
 | --- | --- | --- | --- |
-| UI-01 | Profile selection / onboarding | Existing profiles, active marker, add profile; create dialog with name; choose profile; empty first-run prompt. | FR-01, FR-02 |
-| UI-02 | Home | Active profile, counts of new/due reviewed cards, Review now, library shortcut, optional coverage. | FR-10, FR-13 |
-| UI-03 | Library | Groups, Ungrouped sets, set/card counts, add group/set, edit and delete menus. | FR-03, FR-04 |
-| UI-04 | Group detail | Group name and description, owned sets, add/move/edit/delete group. | FR-03, FR-04 |
-| UI-05 | Group/set editor | Name, optional description, optional group for set, save/cancel, field errors. | FR-03, FR-04 |
-| UI-06 | Set detail | Name, description, total and eligible cards, list of card previews, Add card, Free Study, Grade Mode; edit/move/delete actions. | FR-04, FR-05, FR-07, FR-08, FR-10 |
-| UI-07 | Card editor | Front text, back text, optional side-specific image selectors if P2, save/cancel, delete for existing card. | FR-05, FR-06 |
-| UI-08 | Free Study | Front/back card, position, flip, Previous/Next, exit; no grading controls or learning score. | FR-07 |
-| UI-09 | Graded Review | Current card, progress, flip, Remembered/Forgot enabled after reveal; saving indicator. Both ratings, Exit and system Back are disabled during save. Navigation resumes after success or failure. | FR-08, FR-09, FR-12 |
-| UI-10 | Review summary | Reviewed, remembered, forgot, recall rate if defined; Done / return to start scope. | FR-11 |
-| UI-11 | Profile/settings | Active profile, rename/delete/switch, optional appearance preferences. | FR-01, FR-02, FR-15 |
+| UI-01 | Profile Selection/Management | List local profiles with an active marker. Create, rename, select and confirm deletion. Show creation when no profiles exist and retry when selection restoration fails. | FR-01, FR-02, FR-12 |
+| UI-03 | Set List | Show the active profile, owned sets in stable order, total and eligible card counts for each, a profile control and Create set. Tap a set to open its detail. | FR-02, FR-04, FR-10 |
+| UI-06 | Set Detail | Show set name, optional description, total and eligible counts, and a list of editable card rows. Show the next date for each reviewed card. Offer Add card, Start study, Edit set and confirmed deletion. | FR-04, FR-05, FR-08–FR-10 |
+| UI-05 | Set/Card Editor | Share one screen for set name and optional description or card front and back text. Provide labeled inputs, inline validation, Save and Cancel. Confirm deletion of an existing card. | FR-04, FR-05, FR-12 |
+| UI-09 | Graded Study | Show one card, Front/Back and Flip, original queue position and committed-review count. Enable Remembered/Forgot after reveal. Show saving feedback, retry and an exit confirmation when applicable. | FR-08, FR-09, FR-12 |
+| UI-10 | Review Summary | Show reviewed, remembered, forgot and recall percentage when defined. Done returns to the originating Set Detail. | FR-11, FR-12 |
 
-## 3. Screen states and interaction contract
+UI-01 includes former UI-11 profile management. UI-05 includes former UI-07 card editing.
+UI-02, UI-04 and UI-08 are retired. Retained identifiers preserve references to the earlier
+screen inventory.
 
-### Library and content editing
+## 3. Screen states and interactions
 
-- Show loading only while data is genuinely pending; an empty library includes a create action instead of a blank screen.
-- Save is enabled only for valid fields; display clear validation and preserve input if saving fails.
-- Warn before leaving changed unsaved forms; save returns to the parent screen.
-- Destructive dialogs name the target and explain consequences. Deleting a group explicitly states sets will be moved to Ungrouped.
-- Use overflow menus for edit/delete to keep primary study controls conspicuous.
+### Profiles and editing
 
-### Study
+- Show neutral loading while resolving the saved profile. With profiles but no valid selection,
+  require explicit selection even if only one profile remains. Keep profile data scoped as the
+  user selects or switches profiles.
+- Offer recovery from failed reads. An empty Set List offers Create set and an empty Set Detail
+  offers Add card. Label editor errors by field and enable Save only for valid input.
+- Preserve drafts on rotation and save failure. Confirm leaving a changed draft. Deletion
+  dialogs name the target and explain which records will be deleted.
 
-- Card front text is readable without scrolling the full screen; long content can scroll inside the card; optional images fit without cropping essential content.
-- Show visible “Front” / “Back” or equivalent labels; flip has a labeled accessible action. Animation supports comprehension but is not needed to study.
-- Free Study shows current position and navigation; no grade indicators.
-- Graded Review shows position and number of cards reviewed; the user first attempts recall, then reveals the answer. Buttons use both text and icon. No ambiguous unlabeled red or green buttons.
-- Save failure leaves the card visible with retry. If no eligible cards exist, stay on Home or Set Detail, explain that nothing is due and offer Library or Free Study.
+### Graded Study and recovery
 
-### Profile, offline and lifecycle
+- Refresh counts using the current local day on foreground return and at study start. With
+  no eligible cards, keep Set Detail visible and explain the empty queue.
+- Flip only in Graded Study. Use a labeled control and allow long card text to scroll.
+  Disable both ratings, Exit and system Back during saving. Restore navigation afterward.
+  On error keep the revealed card available for retry.
+- Completion and confirmed early exit open Review Summary. Rotation retains study position,
+  visible face and reveal state. After process restart, restore saved data and allow a fresh queue.
 
-- Active profile is visible on Home/Library; no cross-profile content is retained in screen state after switch.
-- Returning from background refreshes due counts if the date has changed.
-- No cloud connectivity error screen exists because basic features are local. Local database/file failures show actionable feedback.
-- Rotation preserves necessary input and current study state. Process restart restores profile and committed data; exact unfinished session resumption is not required.
+## 4. Layout
 
-## 4. Adaptive layout
-
-- Compact width: one column, top bar, bottom navigation for primary destinations.
-- Medium/expanded: use additional width for cards and lists; optionally a navigation rail and list/detail panes (P2).
-- Support landscape and font scaling without truncating primary grading actions. Allow vertical scrolling on constrained screens.
-
-## 5. Traceability
-
-All MVP screens and activities map to FR-01–FR-12 (except optional FR-06). UI-02 and UI-11 have optional extensions only. Do not add an authentication screen, cloud-sync settings, public feed, or timer by default.
+Use one straightforward navigation stack with labeled actions, native Android insets and a
+scrollable layout. Keep primary controls reachable in portrait, landscape and at larger text
+sizes. The [UI description](6-ui-design/ui-description.md) specifies the visual treatment.

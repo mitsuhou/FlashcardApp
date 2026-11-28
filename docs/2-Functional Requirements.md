@@ -1,56 +1,51 @@
 # Functional & Non-functional Requirements
 
-Version 1.1 — planning baseline. The P1 acceptance conditions incorporate the [specification clarifications of 2026-11-21](../specs/001-offline-flashcard-study/spec.md#session-2026-11-21). Preserve these IDs in feature plans and tasks.
+Version 3.0. P1 requirements define the v1 release for a local learner. P2 and P3 requirements
+are deferred beyond v1. Retired identifiers remain reserved for traceability.
 
-## 1. Priority and actors
+## 1. Functional requirements
 
-P1 = required MVP, P2 = desirable after stable core, P3 = optional. The original flashcard-first priority is preserved in product value, but profile/storage foundations must be developed before the study features that depend on them. The only actor is a local learner. No server-side account or admin is required.
-
-## 2. Functional requirements
-
-| ID | Priority | Requirement | Acceptance condition |
+| ID | Priority or status | Requirement | Acceptance condition |
 | --- | --- | --- | --- |
-| FR-01 | P1 | Create, rename, select and delete local profiles. | First launch allows creation; selection persists; deleting a profile requires confirmation. After deletion of the active profile or invalid selection, show creation with zero profiles and require explicit selection with any survivors, including one. |
-| FR-02 | P1 | Isolate libraries and review data by active profile. | Profile B cannot list, open, modify or review Profile A's cards, even from a stale navigation ID. Switching clears the old back stack, session and UI observations. A write already started for A may finish only for A. |
-| FR-03 | P1 | Create, rename, edit description of and delete groups. | Group name is required. Group/set field limits and description normalization follow BR-03. Deleting a group moves its sets to Ungrouped; no cards or schedules are lost. |
-| FR-04 | P1 | Create, view, edit, delete and move flashcard sets within the current profile. | Set name is required, description optional. Sets can belong to zero or one group. Deletion requires confirmation and removes its cards/history. |
-| FR-05 | P1 | CRUD two-sided flashcards inside a set. | Front and back text are both required and non-blank. A saved card is visible in the same set after restart. |
-| FR-06 | P2 | Add, replace or remove an optional image on either side. | Card still needs valid front/back text; selected images remain readable offline after restart. Cancel/failure does not erase existing content. |
-| FR-07 | P1 | Non-Grade / Free Study mode. | All cards in a selected set are navigable; users can flip either side and move previous/next. No ratings, scores, review history or schedules are changed. |
-| FR-08 | P1 | Grade / Scheduled Review mode. | Only new or due cards are queued. A card starts front-side up; after reveal, Remembered (✓) or Forgot (✗) becomes available. Each card is scored at most once per session. |
-| FR-09 | P1 | Assign a next review date based on self-assessed recall. | A committed rating updates card schedule and review log atomically; due selection, late review and failure behavior follow BR-10–BR-12. Enforce one log and schedule change per session/card. While saving, disable both ratings, Exit and system Back. Restore navigation on success or failure. The approved ladder uses the local review day. Each reviewed card’s Set Detail row shows its saved next date. |
-| FR-10 | P1 | Display review availability. | Home shows due/new count for active profile; sets show their own eligible counts; refresh counts on resume and at review start using the current local date. An empty queue shows an actionable empty state at the entry screen. |
-| FR-11 | P1 | Show graded session summary. | Show number reviewed, remembered, forgot, and recall rate for committed ratings; unfinished cards remain eligible. A zero-review session has no percentage. |
-| FR-12 | P1 | Preserve committed data and handle interruptions. | Completed CRUD and grades survive restart. An interrupted session may restart with a fresh queue. Committed grades survive and unfinished cards receive no rating. |
-| FR-13 | P2 | Display profile learning coverage. | Coverage = currently existing cards with at least one committed review / all existing cards; zero cards display no data. Show as a fraction and percentage; do not call it mastery. |
-| FR-14 | P3 | Optional recall countdown. | If enabled later, expiry reveals a prompt or answer but never records Forgot automatically; a user rating is still required. |
-| FR-15 | P3 | Extended personalization. | Optional appearance choices such as theme or accent only after MVP; exact choices require approval. |
+| FR-01 | P1 | Create, rename, select and delete local profiles. | Persist the selected profile and open its Set List. On launch, restore a valid selection. With no profiles, show creation. With profiles but no valid selection, require an explicit choice even if only one profile remains. Confirm deletion. |
+| FR-02 | P1 | Isolate libraries and review data by profile ID. | A foreign or stale ID cannot expose or modify another profile's records. Switching clears the old back stack, drafts, session and UI observations. In-flight work may finish only for its original profile and its result cannot appear in the new profile. |
+| FR-03 | Removed / Out of scope in v3.0 | Former Group/Ungrouped management. | — |
+| FR-04 | P1 | Create, view, edit and delete study sets in the selected profile. | A trimmed name has 1–80 characters. The optional trimmed description has at most 500 characters, with blank saved as absent. Confirm deletion and remove its cards and review logs. |
+| FR-05 | P1 | Create, view, edit and delete two-sided text cards in a set. | Each trimmed face has 1–2,000 characters. Cards remain in the same set after restart. Edits preserve schedule and history. Confirm deletion and remove only that card and its logs. |
+| FR-06 | P2 · Deferred | Optional local card images. | Outside v1 acceptance. |
+| FR-07 | Removed / Out of scope in v3.0 | Former Free Study and flippable Set Detail preview. | — |
+| FR-08 | P1 | Run Graded Study for one set, starting from Set Detail. | A queue snapshot admits only cards in the selected set whose due day is absent or no later than today. Each starts on the front and the learner must reveal the answer before rating Remembered or Forgot. |
+| FR-09 | P1 | Persist a grade and next review date. | Use BR-11 and BR-12 to save one ReviewLog and one schedule update in one Room transaction, unique per (sessionId, cardId). Disable ratings, Exit and system Back during a save. Advance only after commit. On failure retain the revealed card and offer retry. Set Detail shows the saved next date on each reviewed card's row. |
+| FR-10 | P1 | Show review availability for each set. | Set List and Set Detail show total and eligible counts. Refresh on data changes and when the app resumes on a new local day. Recheck eligibility on study start. An empty queue leaves the learner on Set Detail with an explanation and Add card when the set is empty. |
+| FR-11 | P1 | Show Review Summary at completion or confirmed early exit. | Show reviewed, remembered and forgot counts and rounded recall percentage from committed ratings. Omit the percentage at zero reviews. Done returns to the originating Set Detail. |
+| FR-12 | P1 | Preserve committed data and handle interruptions. | Saved profile selection, edits, deletions and grades survive restart. A new session may take a fresh queue. An interrupted card receives no grade. Ungraded cards remain eligible if their saved schedule permits. |
+| FR-13 | P2 · Deferred | Aggregate review coverage. | Outside v1 acceptance. |
+| FR-14 | P3 · Deferred | Optional recall countdown. | Outside v1 acceptance. |
+| FR-15 | P3 · Deferred | Appearance personalization. | Outside v1 acceptance. |
 
-## 3. Non-functional requirements
+## 2. Non-functional requirements
 
 | ID | Priority | Requirement and verification |
 | --- | --- | --- |
-| NFR-01 | P1 | Offline use: create profiles, edit cards, study and retrieve schedules in airplane mode. No required network service. |
-| NFR-02 | P1 | Persistence and integrity: confirmed writes are retained across process restart; relationships enforce ownership; failed writes must not partially update rating/schedule. |
-| NFR-03 | P1 | Usability: visible primary actions, meaningful labels, confirmation for destructive actions, error/empty/loading states, clear mode and active profile. |
-| NFR-04 | P1 | Accessibility: labeled icons, non-color-only correctness indicators, touch targets at least 48 × 48 dp and text contrast at least 4.5:1 for normal text or 3:1 for large text. Validate at default (100%) and 130% font scale in both portrait and landscape. |
-| NFR-05 | P1 | Basic adaptive UI: core screens work in portrait/landscape and available screen width without clipped controls or losing committed data; enhanced large-screen layout is P2. |
-| NFR-06 | P1 | Maintainability: UI must not query DAOs directly; scheduler is pure and unit-testable; dependencies remain small and documented. |
-| NFR-07 | P1 | Privacy: local profiles are logical separation, not encryption or identity authentication; image access uses user-selected files and no unnecessary storage/network permissions. |
-| NFR-08 | P1 | Reliability: validation blocks invalid inputs; concurrent/double-tap grade submission cannot create two ratings for the same session card; failure shows retry and retains current card. |
-| NFR-09 | P1 | Verification: successful debug build, scheduler unit tests, repository/Room isolation tests and representative Compose navigation/UI tests. |
-| NFR-10 | P2 | Enhanced adaptive experience: tablet/foldable screens may use two-pane layouts with the same accessible actions. |
+| NFR-01 | P1 | Complete the profile, editing and study flows in airplane mode from first launch through restart. |
+| NFR-02 | P1 | Persist committed writes across process restart, enforce ownership and keep grade logs and schedule updates atomic. |
+| NFR-03 | P1 | Show the active profile on Set List, label primary actions, explain empty and error states, and give clear saving feedback. Name the affected item and consequence in destructive confirmations. |
+| NFR-04 | P1 | Provide meaningful labels, text and symbols for ratings, touch targets of at least 48 × 48 dp and contrast of at least 4.5:1 for normal text or 3:1 for large text. Check core controls at 100% and 130% font scale in portrait and landscape. |
+| NFR-05 | P1 | Keep core actions reachable in portrait, landscape and available window sizes. Preserve editor drafts and the current study state on rotation. |
+| NFR-06 | P1 | Keep DAOs in the data layer. Use testable Kotlin scheduling rules with explicit dates, one app module, manual DI and the course's MVVM and unidirectional data flow patterns. |
+| NFR-07 | P1 | Keep learner data on the device. Local profiles provide logical isolation. The app needs no credentials and no unnecessary network or shared-storage permissions. |
+| NFR-08 | P1 | Reject invalid input, retain a failed draft or grade for retry, and prevent duplicate commits for the same session card even when submissions compete. |
+| NFR-09 | P1 | Produce a debug build and focused JVM rules, Room and Compose results, plus a recorded offline walkthrough. |
+| NFR-10 | P2 | Enhanced tablet/foldable layouts are deferred beyond v1. |
 
-## 4. Acceptance demo
+## 3. Acceptance demo
 
-1. Create two profiles; create a group, set and three cards in profile A.
-2. Switch to B; verify A data is inaccessible; switch back.
-3. Use Free Study, flip cards and navigate; confirm no schedule or history change.
-4. Use Grade Mode; grade a card Remembered and a card Forgot; confirm independent dates per business rules and a correct summary.
-5. Exit before grading the last card; verify committed ratings remain and the ungraded card is available.
-6. Restart with airplane mode, verify data and repeat due-card checks at a known local date.
-7. Delete a group and confirm sets survive ungrouped; confirm set deletion removes associated cards/history.
+1. Start in airplane mode. Create and select profile A, then create a set and three text cards.
+2. Select B and verify that A's sets are inaccessible. Reselect A and open its set.
+3. Start Graded Study from Set Detail. Reveal and rate one card Remembered and one Forgot,
+   then confirm early exit. Check two committed ratings, 50% recall and return to Set Detail.
+4. Check the saved dates, restart offline and verify the cards, ratings and remaining eligible
+   card. Confirm that deleting a set removes its cards and logs while other sets remain.
 
-## 5. Boundaries
-
-No account sign-in, remote sync, automatic machine grading, timers that change grades, image-only cards or cross-profile sharing in MVP. When clarification changes a requirement, update this baseline and the formal spec rather than silently implementing extra behavior.
+The [business rules](4-Business-Rules.md) define queue order, dates, duplicates and recovery.
+The [screen inventory](5-App-Description.md) defines the six v1 screen types.

@@ -1,6 +1,8 @@
-# Quickstart — FlashcardApp P1 validation
+# Quickstart — FlashcardApp v3.0 validation
 
-Use this guide as each feature becomes available and run the full sequence before the demo.
+The three dated records below preserve the original Phase 1 and Phase 2 results verbatim.
+Their counts, schema and task references describe what was verified at the time.
+Current tasks and pending checks begin at [Prepare and build](#prepare-and-build).
 
 ## Phase 1 verification
 
@@ -36,118 +38,84 @@ The checkpoint passed. T023 was approved, completing Phase 2 (T006–T023).
 
 ## Prepare and build
 
-1. Open the repository root (the directory containing `settings.gradle.kts`, `gradlew` and
-   `app/`). Install SDK Platform 37.0 (`platforms;android-37.0`), Build Tools 36.0.0 and Platform Tools through SDK Manager. Configure
-   the SDK location in Android Studio or with `ANDROID_HOME`.
-2. Use the checked-in Gradle 9.5.0 wrapper and provide the JDK 25 requested by
-   `gradle/gradle-daemon-jvm.properties`, locally or via configured toolchain provisioning.
-   The app module's Java 11 compile target is separate from the Gradle daemon JVM.
-   Allow network access on the build machine for first-time downloads.
-3. Connect one USB-debuggable course device or start one phone emulator. Use a disposable
-   emulator for first-launch and deletion scenarios. Check the supported floor on an API 24
-   emulator and the current UI on the course device or an API 37 emulator. Log the actual
-   Android version used for the demo.
-
-Record checkpoint evidence after each phase. The Phase 1 record above is complete.
-
-| Phase | Required evidence |
-| --- | --- |
-| 1 · Setup (T001–T005) | Configure dependencies and test host, inspect classpaths, build and install the debug starter, confirm the device reports API 24 and launch MainActivity. Record the build and launch result. |
-| 2 · Foundation (T013, T019–T023) | Generate and inspect the v1 Room schema with KSP. Verify the concrete Application, AppContainer and ViewModel factory wiring and run the foundation suites. Story-specific ViewModel registrations follow their screens. |
-| 3 · Profiles (T024–T029) | Verify selection, Home counts, cancellation of old UI observations and Back after switching. |
-| 4 · Library (T030–T037) | Run the editor and library suites, including resume with a new local date. |
-| 5 · Free Study (T038–T041) | Verify browsing and compare learning records before and after practice. |
-| 6 · Graded Review (T042–T047) | Exercise both entry points, empty queues, saving, retry, Exit/Back and committed summaries. |
-| 7 · Integration (T048–T051) | On API 24, exercise the implemented calendar path at a known local date. For a late stage-1 Remembered on November 24, verify stage 2 and November 27 after reopen. Record the device/API and result separately from the presentation-runtime checks. |
-
-Run from the repository root. On Windows use `gradlew.bat` in place of `./gradlew`.
+Use SDK Platform 37, Build Tools 36.0.0, Platform Tools and the repository's Gradle 9.5.0
+wrapper with JDK 25. The app targets Java 11 bytecode and supports API 24. Use a disposable
+phone emulator or development device for the pre-release schema reset and deletion checks.
+Before running v3.0, use a clean development installation so it starts with the new
+four-table Room v1 schema.
 
 ```sh
 adb devices -l
 adb shell getprop ro.build.version.sdk
-./gradlew --version
-./gradlew :app:assembleDebug :app:testDebugUnitTest
+./gradlew :app:assembleDebug :app:testDebugUnitTest :app:processReleaseMainManifest
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-Expect a target listed as `device`, a debug APK, and passing feature test cases. Inspect
-`app/build/reports/tests/` for local results and `app/build/reports/androidTests/connected/`
-for instrumentation results. Check the report's executed cases against the matrix below.
-A passing template example only verifies the starter project. [Android test commands](https://developer.android.com/studio/test/command-line)
+Use a connected target reported as `device`. Check actual test cases and counts in
+`app/build/reports/tests/` and `app/build/reports/androidTests/connected/`.
+Inspect the four-table v1 JSON and merged manifest for release backup exclusions and
+unnecessary network or shared-storage permissions. For T034, run a short API 24 smoke of the
+implemented calendar path. With a stage-1 card rated Remembered on November 24 at a fixed
+local date, expect stage 2 and a November 27 due date after reopen. Record the device/API.
+The course device may be the same device or a separate one.
+
+## Phase checkpoints
+
+| Phase | Evidence to record |
+| --- | --- |
+| 1 · T001–T005 | Approved historical starter build, tests, manifest and API 24 launch above. |
+| 2 · T006–T023 | Four-table Room export, application/container wiring and focused JVM/Room suites. Check profile isolation, cascades, persisted selection, required set scope and atomic grade durability. |
+| 3 · T024–T026 | Profile UI, validated selection into the Set List route, recovery and Back after switching. |
+| 4 · T027–T030 | Owned Set List and Set Detail, the shared editor, validation and count refresh on a new local day. |
+| 5 · T031–T033 | Single-set study, answer reveal, save/retry, summary totals and return to Set Detail. |
+| 6 · T034–T035 | Debug build and suite results, merged manifest and API 24 smoke, plus the offline demo and accessibility observations. |
+
+Record the relevant checks at each checkpoint and obtain approval before starting the next phase.
 
 ## Automated acceptance matrix
 
-Use fixed local dates and supplied test profiles. Prefer JVM tests for rules, Android Room
-tests with private test databases for storage guarantees, and Compose instrumentation for
-visible behavior. Use an on-disk database for close/reopen persistence cases. Test fixtures
-and injected failures belong in tests. [Room database testing](https://developer.android.com/training/data-storage/room/testing-db)
+Use fixed local dates in tests and two profiles when checking isolation. Cover detailed
+edge cases at the rules and storage boundaries and keep Compose checks representative.
 
-| Level and story | Exercise and expected result | Acceptance references |
+| Level | Representative evidence | Tasks and coverage |
 | --- | --- | --- |
-| JVM · US1 | Exercise Remembered at stages 0–6 and Forgot at every stage. Check all six intervals, the 60-day cap, tomorrow after Forgot, month/year rollover, leap day and a DST transition. A late stage-1 review saved on Nov 24 is due Nov 27. Changing zone changes the comparison date and leaves stored dates intact. Expect no percentage with zero reviews, 67% for two of three remembered and 50% for one of two. | FR-08, FR-09, FR-11 · NFR-06 · BR-11–BR-13 · SC-03, SC-04 |
-| JVM + editor UI · US3, US4 | Trim required fields. Check blank and whitespace-only values, 1/80/81 for group/set names, and 1/2,000/2,001 per card face. For both group and set descriptions, save and reopen padded text with a trimmed length of 500, reject 501 after trimming, and clear an existing description with whitespace only. Expect trimmed text or null in storage. Accept duplicate card content and group/set names. Test Save/Cancel, named confirmation, discard confirmation and draft retention on failure. | FR-01, FR-03–FR-05 · NFR-03, NFR-08 · BR-01, BR-03, BR-05 · UI-01, UI-05, UI-07 · SC-01, SC-06 |
-| Room + selection persistence · US4 | Create A/B with identically named items. Start an A write, select B and let it finish for A. A new B lookup or write using A’s item ID must find no matching record. Verify B’s records are intact and A alone can contain the started write. Reopen the database and preferences. Test valid selection, missing/deleted ID with one survivor, and zero profiles. While awaiting explicit selection, expect no active profile or visible library. Confirm profile deletion removes only owned content and reviews. | FR-01, FR-02, FR-10, FR-12 · NFR-02, NFR-07 · BR-01, BR-02, BR-06 · UI-01, UI-02, UI-11 · SC-01 |
-| Compose · Phase 3 US4 (T024) | Use empty storage for onboarding. For switching, seed A and B through Phase 2 repositories with identically named sets and different new/due counts. Select each profile, check its Home name and counts, then use Back in B and verify A’s Home/Profile cannot reopen. This provides partial SC-01 evidence. Phase 7 T049 exercises real stale Set Detail and review routes and isolation of a write already started for A. | FR-01, FR-02, FR-10, FR-12 · UI-01, UI-02, UI-11 · SC-01 |
-| Compose · Phase 4 US3 (T030) | Switch between two profiles with identically named sets and check the active display name on both Library tabs. For Library and Set Detail separately, seed a single reviewed card due tomorrow. Background the screen, supply the next local day on resume without writing to Room. Expect eligible count 0 → 1 and the original saved due date. | FR-02, FR-10 · NFR-03 · UI-03, UI-06 |
-| Room · US3 | Create, read, rename/edit, move and delete items. Reject mixed-owner relationships. Moving a set or editing a card preserves schedules and reviews. Group deletion leaves sets in Ungrouped. Set/card deletion removes exactly the corresponding descendants and reviews. Check both profiles and reopen the file. | FR-02–FR-05, FR-12 · NFR-02 · BR-03–BR-07 · UI-03–UI-07 · SC-01, SC-05 |
-| JVM + Room · US1 | Seed due, overdue, new, future and foreign cards in two sets with tied dates/creation times. Compare profile and set counts and queues. Reviewed eligible cards precede new cards, with ID tie-breaks. Snapshot excludes cards added later, skips deleted cards, excludes a just-forgotten card and respects date changes on foreground return. | FR-02, FR-08–FR-10 · BR-02, BR-10–BR-12 · UI-02, UI-06, UI-09 · SC-03 |
-| Room + ViewModel · US1 | Fail a real transaction after its first write using a test-only fault, then inspect both tables. Neither change may persist. Retry successfully and submit competing taps for the same session/card. Expect exactly one log and one schedule update for the same session/card even if the taps conflict. Reopen the file and start from current eligibility. The committed grade and date persist. Verify a save error keeps the current card, and a successful retry advances once. | FR-08, FR-09, FR-11, FR-12 · NFR-02, NFR-08 · BR-11–BR-13 · UI-09, UI-10 · SC-04 |
-| Compose + Room · US2 | Browse both sides of new, due and future cards in preview and Free Study. Verify default Front, reset on card change, position, repeat flips, stable order and previous/next boundaries for one and many cards. Compare history, stages, due dates and eligible counts before/after. | FR-07, FR-10 · BR-09 · UI-06, UI-08 · SC-02 |
-| Compose · Phase 6 US1 (T043) | Force review recomposition before a grade tap and during its pending save. Observe zero repository grade commands before the tap, exactly one through the pending recompositions, and exactly one advancement on commit. Try Exit and system Back during the held save. Neither navigates or opens a dialog. After commit navigation works on the next card or summary. After rollback the revealed card offers Retry and early exit works. With an empty queue at either entry point, stay at the origin and show that nothing is due. | FR-09, FR-11, FR-12 · NFR-08 · UI-09, UI-10 · SC-04 |
-| Compose navigation · all four stories | Exercise onboarding, Home, Library tabs, groups, set sheets, editors, mode entry and Back/Done. Grade becomes available after first reveal and stays available if flipped back. Check empty, loading, saving, error/retry and cancel/confirm exit states. Rotate with a draft and during review. While the first card of a three-card snapshot is open, delete the second through the fixture. Rate the first and verify the second is skipped. Expect “3 of 3” and one reviewed on the third, then two reviewed after its grade. Check reveal state, summary, Set Detail date and navigation reset after profile switch. | FR-01–FR-05, FR-07–FR-12 · NFR-03–NFR-05, NFR-08 · BR-01–BR-07, BR-09–BR-13 · UI-01–UI-11 · SC-01–SC-06 |
-
-For NFR-06, also review the changed dependencies and confirm screen code has no direct DAO
-access. For NFR-07, inspect the merged manifest and backup settings for local-only handling of
-learner data and unnecessary network/storage permissions. NFR-09 requires build, JVM, Room
-and representative Compose results together. P2 and P3 identifiers remain deferred in the
-[clarified specification](spec.md).
+| JVM rules and validation | Check all Remembered intervals and cap, Forgot, overdue and calendar boundaries, and zero/rounded summaries. Check blank, exact and over-limit set names and card faces, and trim or clear the set description. | T006–T007 · SC-02–SC-04 · NFR-06, NFR-08 |
+| Room and DataStore | With separate profiles and identically named sets, try stale IDs and complete a started write after switching. Reopen files and verify selection recovery and exactly scoped profile/set/card cascades. Verify saved descriptions and schedule/history preservation on edits. | T020–T021 · SC-01, SC-02, SC-05 · NFR-02 |
+| Room study | Seed multiple sets and profiles and check target-set counts, empty queue, date/ID ordering, future and forgotten cards, and eligibility on a new local day. Verify wrong-set and wrong-profile reads/writes, including zero summary contribution. Force a rollback, retry and submit competing grades. Reopen and verify the committed result. | T022–T023 · SC-03, SC-04 · NFR-02, NFR-08 |
+| Profile and library UI | Exercise profile creation or switching and Back isolation, one invalid editor input, save/return and a count refresh without a database write. Check actual scope when live Set List is connected. | T026, T030 · SC-01–SC-03 · NFR-03, NFR-08 |
+| Study ViewModel and Compose | Check answer reveal, frozen positions and skip, no grade triggered by recomposition, Exit/Back blocked during save, failure/retry, empty entry and Summary → Set Detail. Use a committed summary and a zero-grade case. | T033 · SC-03, SC-04 · NFR-03, NFR-08 |
 
 ## Offline course demo
 
-Use a fresh disposable test installation. Install the debug app, enable airplane mode and
-ensure Wi-Fi is off **before first launch**. USB or emulator debugging stays available for
-the restart check. Keep the device offline through the walkthrough.
+Install the debug app on a clean disposable device. Enable airplane mode and turn off Wi-Fi
+before first launch. Keep the app offline for the walkthrough and restart.
 
-```sh
-./gradlew :app:installDebug
-adb shell am start -n com.example.flashcardapp/.MainActivity
-```
+1. **Profiles and editing.** Create and select A. Its Set List opens directly. Create a
+   set and three text cards. Edit one of them. Check a blank required field in the editor.
+   Create and select B. Check that its Set List and Back do not expose A's data. Reselect A.
+2. **Study and summary.** Open A's set. Reveal and rate one card Remembered and one Forgot.
+   Confirm exit before rating the third. Verify 2 reviewed, 1 remembered, 1 forgot and 50%.
+   Select Done. The same Set Detail opens with both saved next review dates and one eligible
+   card. If both new cards were rated on the same local day, both are due tomorrow.
+3. **Interruption and restart.** Start the remaining card and reveal it. Stop and relaunch
+   the process before rating. Verify A restores to Set List, its set still has three cards
+   and two saved next dates, and the third card is still eligible. Start a fresh queue and
+   confirm exit before grading. Check that the summary has zero reviews and no percentage.
+4. **Deletion.** Create a second disposable set with a card. Cancel deletion once and
+   verify the set remains. Confirm deletion of that set and verify the original set remains.
+   The Room suite verifies removal of the deleted cards and their logs.
+5. **Accessibility and rotation.** Spot-check the editor, study and summary controls in
+   portrait and landscape at both 100% and 130% font scale. Verify labels, both text-and-symbol
+   ratings, scrolling, no clipping, 48 × 48 dp touch targets and rendered contrast of at
+   least 4.5:1 for normal text and 3:1 for large text. Rotate with a draft and after answer
+   reveal, then verify draft, card position, visible face and available controls. Complete
+   the create → reveal → grade → Done path on the demo device.
 
-1. **US4 and US3 · SC-01.** Create and select profile A. Create a group, a set in it and
-   three cards with distinguishable fronts/backs. Rename a set, open each face and return
-   to Library. Create and select B. Its Home and Library show empty counts and Back cannot
-   reopen A. Reselect A and check the three saved cards.
-2. **US1 · SC-03 and SC-04.** From Home, start Graded Review. Reveal card one, select
-   Remembered and wait for the next front. Reveal card two, select Forgot, then confirm
-   early exit before rating card three. Expect 2 reviewed, 1 remembered, 1 forgot and 50%.
-   Done returns to Home. In Set Detail each rated row shows tomorrow's local date (both
-   cards were new), and card three has no scheduled date. One card is eligible.
-3. **US2 · SC-02.** In preview and Free Study, flip all three cards, including the two due
-   tomorrow. Previous/Next stop at the ends. Exit and compare counts and dates with step 2.
-   Keep the device date fixed during this comparison.
-4. **Interruption and restart · SC-01, SC-03, SC-04.** Start a set-scoped review of the
-   remaining card and reveal it. Before rating, stop and relaunch the process with the
-   commands below. Expect A restored, the first two committed grades intact and the third
-   card still eligible. Start a fresh session, exit before grading and check zero reviewed
-   with no percentage. Done returns to its originating scope.
+Use the test suite for fixed dates, failure injection, duplicate commits and storage-level
+cascades. The demo uses the actual device day. See the [UI acceptance](../../docs/6-ui-design/ui-description.md#9-accessibility-and-verification).
 
-   ```sh
-   adb shell am force-stop com.example.flashcardapp
-   adb shell am start -n com.example.flashcardapp/.MainActivity
-   ```
+## v3.0 verification record
 
-5. **Adaptive UI · SC-06.** Run four independent passes in a separate disposable fixture, starting with an empty set each time. Use portrait at 100%, portrait at 130%, landscape at 100% and landscape at 130%. Keep each setting for the entire pass.
-   - Create and save a two-sided card with long text. Start Graded Review from that set, flip the card and identify both ✗ Forgot and ✓ Remembered by label and symbol. Submit one grade, verify one committed review on the summary and tap Done. Verify return to the originating set and its empty review workload.
-   - Record the full journey for each setting. Check accessible names, gesture alternatives, scrolling, clipping and reachability. Measure touch targets in both dimensions (minimum 48 × 48 dp) and text contrast on actual surfaces (4.5:1 normal, 3:1 large as defined in NFR-04).
-   - Separately, return to profile A from step 4. Rotate while editing its remaining card and verify the draft survives. Rotate after reveal during review and resize where supported. Verify position, face and enabled actions survive, submit the last grade and check the empty review state. Compare Library, group, preview, sheet and landscape review against REF-01–REF-07.
-   [UI description and reference index](../../docs/6-ui-design/ui-description.md)
-6. **Deletion · SC-05 and SC-01.** Cancel group deletion once, then confirm it and verify
-   the set appears in Ungrouped with all three cards and dates intact. Confirm set deletion
-   and verify its cards disappear and counts update. Delete A. With only B left, the profile
-   selector appears and B's Home requires an explicit selection. Delete B on this disposable
-   installation and verify profile creation opens.
-
-For the demo record the device/API, debug build result, automated pass/fail counts and any
-observed deviation from SC-01–SC-06. The scheduler and transaction tests supply the evidence
-for future dates, duplicate submissions and failed writes without changing the demo phone's
-clock or adding controls to the app. [Scheduling and persistence design](data-model.md)
+Pending. Record checkpoint date, task IDs, build result, device/API and executed test counts
+after each phase. For final acceptance, record the offline demo results for SC-01–SC-06,
+including orientation, font scale, measurements and any outstanding defects.

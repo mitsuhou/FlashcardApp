@@ -1,120 +1,122 @@
 # Business Rules & User Workflows
 
-Version 1.1 — business rules. The P1 rules below incorporate the [specification clarifications of 2026-11-21](../specs/001-offline-flashcard-study/spec.md#session-2026-11-21). Requirement IDs refer to the companion Functional Requirements document.
+Version 3.0 — business rules for the solo MVP. Requirement IDs refer to the
+[functional requirements](2-Functional%20Requirements.md). Retired rule IDs remain reserved.
 
 ## 1. Glossary
 
-- Profile: local learner workspace. At most one profile is active. There is no active profile while the selector awaits explicit selection.
-- Group: optional organizational category for sets; not a nested folder.
-- Flashcard set (deck): collection of cards, belonging to one profile and optionally one group.
-- Card: mandatory front and back text with optional local images.
-- Free Study / Non-Grade Mode: browse any cards in a set without affecting progress.
-- Graded Review / Grade Mode: self-rate eligible cards and update review schedules.
-- New: no committed rating yet. Due: review date is today or earlier. Overdue: date is earlier than today.
+- **Profile** is a local learner workspace. At most one profile is active.
+- **Study set** is a collection of two-sided text cards owned by one profile.
+- **New, due and overdue** describe a card with no saved date, a review date on or before
+  today, and a review date before today, respectively.
+- **Graded Study** is a set-scoped session in which the learner rates their own recall.
 
 ## 2. Profile and library
 
 | ID | Rule | Related |
 | --- | --- | --- |
-| BR-01 | Require a trimmed, nonblank display name. Restore a valid saved profile. After active-profile deletion or an invalid selection, show creation if no profiles remain. Otherwise show the selector, even for one survivor. Open Home only after explicit selection in this recovery flow. | FR-01 |
-| BR-02 | Each owned operation uses the profileId selected when it starts. Check ownership in the repository and DAO. Switching clears the old stack, session and displayed data and cancels old UI observations. An in-flight operation may finish only for its original owner. | FR-02 |
-| BR-03 | Trim group/set names and require 1–80 characters. Trim leading and trailing whitespace from optional descriptions before validation and persistence. Store a blank result as absent (null). A nonblank trimmed result may contain up to 500 characters. Duplicate names are allowed; IDs are authoritative. | FR-03, FR-04 |
-| BR-04 | Groups are flat. Sets are assigned to at most one group; removing a group moves its sets to Ungrouped. | FR-03, FR-04 |
-| BR-05 | A set may be empty. Cards have one parent set; front and back text each contain 1–2,000 characters after trimming. Duplicate cards are allowed. | FR-05 |
-| BR-06 | Profile deletion permanently removes all owned groups, sets, cards and review logs. Set deletion removes its cards/logs. Card deletion removes that card/logs. Require explicit confirmation. | FR-01, FR-04, FR-05 |
-| BR-07 | Text/image edits preserve existing scheduling and history. Moving a set within its profile preserves every card and schedule. Cross-profile moves are not supported. | FR-04, FR-05 |
-| BR-08 | Optional P2 images are selected from device media, copied privately and linked to a side; deletion/replacement removes unneeded files without invalidating retained references. Reject unreadable or oversized inputs with a message. | FR-06 |
+| BR-01 | Trim the profile display name and require a nonblank value. Resolve the saved profile ID against Room. A valid selection opens Set List. With zero profiles, show creation. With profiles but no valid selection, including after deleting the active profile, show the selector and require an explicit choice even for one survivor. A failed storage read offers retry. | FR-01 |
+| BR-02 | Every owned operation uses the profileId selected when it starts. Verify ownership in repositories and DAOs. Switching clears the old navigation stack, drafts, session and displayed data and cancels old UI observations. An in-flight operation may finish only for its original owner. Its result cannot appear in the new profile. | FR-02 |
+| BR-03 | Trim set names and require 1–80 characters. Trim the optional description and save a blank result as null. A nonblank trimmed description may contain up to 500 characters. Duplicate set names are allowed and IDs identify records. | FR-04 |
+| BR-04 | Removed / Out of scope in v3.0 | FR-03 |
+| BR-05 | A set may be empty. Each card belongs to one set. Each trimmed text face must contain 1–2,000 characters. Duplicate card text is allowed. | FR-05 |
+| BR-06 | Require confirmation and explain the effects of deletion. Deleting a profile removes its sets, cards and review logs. Deleting a set removes its cards and their logs. Deleting a card removes that card and its logs. Unrelated records remain intact. | FR-01, FR-04, FR-05 |
+| BR-07 | Set metadata and card text edits preserve existing schedules and review history. | FR-04, FR-05 |
+| BR-08 | Optional card images are deferred beyond v1. | FR-06 |
 
 ## 3. Study session lifecycle
 
 ```mermaid
 flowchart TD
-    A[Select profile and set] --> B{Choose mode}
-    B -->|Free Study| C[Load all cards]
-    C --> D[Flip and browse]
-    D --> E[Exit without data changes]
-    B -->|Grade Mode| F[Load new and due cards]
-    F --> G{Queue empty?}
-    G -->|Yes| H[Show no review needed]
-    G -->|No| I[Show front]
-    I --> J[Reveal answer]
-    J --> K[Rate remembered or forgot]
-    K --> L[Commit grade and schedule]
-    L --> M{More cards?}
-    M -->|Yes| I
-    M -->|No| N[Show summary]
+    A[Open Set Detail] --> B[Load new and due cards in this set]
+    B --> C{Queue empty?}
+    C -->|Yes| D[Stay on Set Detail and explain availability]
+    C -->|No| E[Show front]
+    E --> F[Reveal answer]
+    F --> G[Rate Remembered or Forgot]
+    G --> H[Commit grade and schedule]
+    H -->|Failure| F
+    H -->|More eligible cards| E
+    H -->|Completed| I[Review Summary]
+    I -->|Done| A
 ```
 
-### BR-09 — Free Study (FR-07)
+### BR-09 — Removed / Out of scope in v3.0
 
-- Queue: all cards in the selected set, ordered by creation then ID.
-- Present front by default; flip repeatedly; Previous/Next available when valid.
-- Entire set may be reviewed even when cards are not due. The mode is read-only with respect to learning metrics and schedule.
-- Empty set: explain no cards exist and offer Add card.
+Former Free Study behavior (FR-07).
 
-### BR-10 — Graded Review queue (FR-08, FR-10)
+### BR-10 — Graded Study queue (FR-08, FR-10)
 
-- Start from Home (all profile's due/new cards) or an individual set.
-- Capture a queue snapshot on start: overdue and due reviewed cards first (ascending review date then ID), new cards afterward (creation then ID).
-- A new card is eligible immediately; reviewed card eligible iff due date is not later than today's date.
-- Each eligible card appears at most once in the session; forgotten cards return tomorrow, not again in the current session.
-- New cards created mid-session enter a future session, not this snapshot. If a queued card no longer exists or no longer belongs to the active profile, skip it. Keep its place in the frozen ordering: the next card shows its original one-based position out of the original queue size. Skipping card 2 of 3 leaves card 3 at “3 of 3” and contributes zero committed ratings.
-- Refresh counts on screen resume and review start using the current local date. If the eligible queue is empty, stay at the entry screen, explain that nothing is due and offer Library or Free Study as appropriate.
+- Start from the selected profile's Set Detail and scope the session to that set. A card is
+  eligible when `dueDay == null || dueDay <= today`, using the device's local calendar day.
+  A null date marks a new card. Reviewed cards with an earlier date are overdue.
+- Capture an ordered snapshot of eligible IDs when study begins. Put reviewed cards due today
+  or earlier first, ordered by due date then ID. Put new cards after them, ordered by creation
+  time then ID. Include each card at most once.
+- New arrivals wait for a later session. Skip cards that become unavailable or ineligible,
+  keeping their original position in the snapshot. For example, if card 2 of 3 is skipped, the
+  next card still shows 3 of 3. Skips add no ratings.
+- Refresh Set List and Set Detail counts on data changes and on foreground return when the local
+  day changes. Recheck eligibility at study start. With an empty queue, stay on Set Detail and
+  show why study is unavailable. Offer Add card if the set is empty.
 
-### BR-11 — Recall response and atomic update (FR-08, FR-09)
+### BR-11 — Recall and atomic grading (FR-08, FR-09)
 
-- Each card starts on front. Flip is available at any point; a learner must reveal the back at least once before rating.
-- Remembered and Forgot are self-reported. No automatic semantic checking.
-- On rating, disable both grade actions, Exit and system Back. Validate ownership and eligibility for the originating profile. Record the log and schedule in one Room transaction with a unique (sessionId, cardId) key.
-- Advance once on commit. A duplicate submission leaves the first log and schedule intact. A rollback leaves the revealed card available for retry. Restore navigation after either outcome.
+- Start each card on the front. The learner can flip repeatedly. Enable Remembered and Forgot
+  after the first answer reveal for that card, including if the learner flips back to the front.
+- When the learner taps a rating, disable both ratings, Exit and system Back during the save.
+  At commit, verify the originating profile and set. For a new submission, recheck eligibility.
+- Insert one ReviewLog and update the schedule in one Room transaction. The (sessionId, cardId)
+  key leaves the first committed log and schedule intact when a submission repeats or competes
+  with another. Advance once only after commit. A failed transaction leaves the revealed card
+  available for retry and leaves its schedule and history intact. Restore navigation after
+  success or failure.
 
 ### BR-12 — Date scheduling (FR-09)
 
-The approved interval ladder uses date-only values and takes the local review date as an explicit input. Let today be the device local calendar date captured at rating commit. Store dates, not millisecond multiples of 24 hours; compare with the current device local date on subsequent launches. Log actual review timestamps separately. Changing device date/time zone may affect what is due; do not retroactively rewrite stored review dates.
+Calculate the next date from the device's local calendar date captured when the grade is saved.
+Pass that date explicitly to the scheduling rule. Store the next review date as a calendar day
+and record the actual review timestamp separately. A device date or time zone change can affect
+eligibility. Saved dates stay as recorded.
 
-| Event | Transition | Next review |
+| Event | Stage after | Next review |
 | --- | --- | --- |
-| Card created | stage = 0, no review date | eligible immediately |
-| Remembered at stage 0 | stage 1 | today + 1 day |
-| Remembered at stage 1 | stage 2 | today + 3 days |
-| Remembered at stage 2 | stage 3 | today + 7 days |
-| Remembered at stage 3 | stage 4 | today + 14 days |
-| Remembered at stage 4 | stage 5 | today + 30 days |
-| Remembered at stage 5 or 6 | stage 6 | today + 60 days |
-| Forgot at any stage | stage 0 | today + 1 day |
+| Card created | 0 | No due date, eligible immediately |
+| Remembered at stage 0 | 1 | Today + 1 day |
+| Remembered at stage 1 | 2 | Today + 3 days |
+| Remembered at stage 2 | 3 | Today + 7 days |
+| Remembered at stage 3 | 4 | Today + 14 days |
+| Remembered at stage 4 | 5 | Today + 30 days |
+| Remembered at stage 5 or 6 | 6 | Today + 60 days |
+| Forgot at any stage | 0 | Tomorrow |
 
-An overdue review is rescheduled from the actual review day, not the previous due date. Stage 0 after forgetting is distinguished from a new card by its non-null due date and committed history. Successful retrieval and forgetting on a new card may both schedule tomorrow, but produce different stages.
+Grade overdue cards from the actual review day. For example, a stage-1 card due on November 22
+and rated Remembered on November 24 advances to stage 2 and is due November 27. A forgotten
+stage-0 card has a due date, so it is eligible again tomorrow.
 
-Examples:
+### BR-13 — Interruption and summary (FR-11, FR-12)
 
-- Create 21 Nov: new. Remembered on 21 Nov -> stage 1, due 22 Nov.
-- Remembered on 22 Nov -> stage 2, due 25 Nov.
-- Review late on 27 Nov, Remembered -> stage 3, due 4 Dec.
-- Forgot on 4 Dec -> stage 0, due 5 Dec.
+- While idle, Exit or Back asks for confirmation if ungraded cards remain. Cancel keeps the
+  current session. Confirming exit keeps committed grades and goes to Review Summary.
+- Retain the queue, position, visible face and reveal state on rotation. After process death,
+  a later session may use a fresh queue. Only committed grades affect that queue.
+- At completion or confirmed early exit, show reviewed, remembered and forgot counts from
+  committed grades. Reviewed equals remembered plus forgot. Recall rate is remembered divided
+  by reviewed, rounded to a whole percentage. Omit the rate when reviewed is zero.
+- Done returns to the originating Set Detail. Outstanding ungraded cards keep their saved
+  eligibility and their schedules are untouched.
 
-### BR-13 — Interrupted session and summary (FR-11, FR-12)
+### BR-14 — Aggregate coverage (FR-13)
 
-- When a grade save is idle, Back/Exit asks whether to end the session if unreviewed cards remain. Confirmed ratings remain committed.
-- During rotation, preserve queue/index/flip state when possible via ViewModel. After process death, creating a fresh queue is acceptable; do not revert or repeat committed grades.
-- Summary: reviewed = remembered + forgot; recall rate = remembered / reviewed × 100%, rounded to whole percent. If reviewed = 0, show no percentage.
-- Exit returns to the starting scope; outstanding ungraded cards remain due/new.
+Deferred beyond v1.
 
-### BR-14 — Progress (FR-13)
+### BR-15 — Optional countdown (FR-14)
 
-If P2 is implemented, coverage = current cards with at least one committed grade / current total cards × 100%. It measures exposure, not retention or mastery. A deleted card no longer contributes. Zero-card profiles show “No cards yet”.
-
-### BR-15 — Optional timer (FR-14)
-
-A timer, if approved after MVP, is a study aid only. Expiry does not change scheduling or count as a grade without user action.
+Deferred beyond v1.
 
 ## 4. Main workflows
 
-1. Onboarding: launch -> create profile -> Home -> create set.
-2. Organize: Home -> Library -> create group or set -> add cards -> save -> return to detail.
-3. Study freely: Set detail -> Free Study -> flip/navigate -> exit.
-4. Review: Home or Set detail -> Grade Mode -> reveal -> grade -> next -> summary.
-5. Switch: profile selector -> choose another profile -> new Home with empty/owned data.
-
-## 5. Approved MVP decisions
-
-The [specification clarifications of 2026-11-21](../specs/001-offline-flashcard-study/spec.md#session-2026-11-21) confirm the profile recovery flow (BR-01), field limits (BR-03/05), deletion effects (BR-04/06), interval ladder (BR-12) and interruption policy (BR-13). Each reviewed card’s Set Detail row shows its saved next date. Free Study covers every card in the set, and Graded Review admits new or due cards. All four stories are P1. Images remain P2. Defer optional work first if the three-week schedule comes under pressure.
+1. Launch offline and select or restore a profile. Its Set List opens directly.
+2. Create or open a set and manage its metadata and text cards through Set/Card Editor.
+3. From Set Detail, start Graded Study, reveal and rate cards, and view Review Summary.
+4. Select Done to return to the set. Use the profile control on Set List to switch or manage profiles.

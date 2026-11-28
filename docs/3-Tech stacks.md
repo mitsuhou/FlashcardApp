@@ -1,94 +1,83 @@
-# Technical Stack, Architecture & Theoretical Background
+# Technical Stack, Architecture & Learning References
 
-Version 1.1 — technical background and design inputs for the Android MVP.
+Version 3.0 — technical baseline for the solo Android MVP.
 
-## 1. Learning theory
+## 1. Learning model
 
-- **Flashcard:** a two-sided prompt/answer learning unit.
-- **Active recall:** the learner attempts to retrieve an answer before revealing it; the app does not objectively judge semantic correctness.
-- **Forgetting curve:** a conceptual explanation of declining retention over time, not a universal numerical formula for every learner.
-- **Spaced repetition:** revisiting material at intervals, increasing the interval after successful retrieval and shortening it after forgetting.
+A card presents a prompt before the learner reveals the answer and rates their own recall.
+Remembered advances through the fixed ladder of 1, 3, 7, 14, 30 and 60 calendar days, capped
+at 60. Forgot resets to stage 0 and schedules tomorrow. New cards start at stage 0 and are
+immediately eligible. The ladder is a simple spaced-repetition heuristic. The
+[business rules](4-Business-Rules.md#br-12--date-scheduling-fr-09) specify dates and transitions.
 
-### Approved v1.0 scheduler — binary fixed interval ladder
+## 2. Native Android stack
 
-The original two-button Grade Mode is retained. To fit a three-week course project, use a deterministic interval-ladder heuristic inspired by spaced repetition, not a claim of implementing SM-2 or FSRS:
-
-| Stage after Remembered | Interval (calendar days) |
-| --- | ---: |
-| 1 | 1 |
-| 2 | 3 |
-| 3 | 7 |
-| 4 | 14 |
-| 5 | 30 |
-| 6 (cap) | 60 |
-
-Remembered increases the stage up to 6; Forgot resets stage to 0 and schedules tomorrow. New cards start at stage 0 and are immediately eligible. For review-date and grade transaction behavior see [business rules](4-Business-Rules.md). The [specification clarifications of 2026-11-21](../specs/001-offline-flashcard-study/spec.md#session-2026-11-21) approve these intervals and the next-day Forgot reset.
-
-## 2. Native Android technology
-
-| Area | Selected or proposed technology |
+| Area | Choice |
 | --- | --- |
-| Language | Kotlin |
-| Build | Existing Android Studio template, Gradle wrapper, Kotlin DSL and existing version catalog where available |
-| UI | Jetpack Compose, Material 3, Compose Animation |
-| Adaptive UI | Window size classes; Material 3 Adaptive components only if useful |
-| Navigation | Navigation Compose |
-| State | Lifecycle ViewModel, immutable UI state, StateFlow, lifecycle-aware collection |
-| Local data | SQLite via Jetpack Room (entities, foreign keys, indexes, DAOs and transactions) |
+| Language and build | Kotlin, existing Gradle wrapper, Kotlin DSL and version catalog |
+| UI and navigation | Jetpack Compose, Material 3, one activity and one Navigation Compose host |
+| State and events | Screen ViewModels, immutable StateFlow UI state, lifecycle-aware collection and explicit events |
+| Local data | Room with foreign keys, indexed queries and transactions |
+| Selection | Preferences DataStore stores the active profile ID. Room verifies that it exists. |
 | Async | Kotlin Coroutines and Flow |
-| Settings | Preferences DataStore for active-profile ID or simple equivalent; Room is the source of truth for profile existence |
-| Images (P2) | Android Photo Picker/appropriate fallback + app-private files; no upload |
-| Tests | JUnit, kotlinx-coroutines-test, Room/repository integration tests, Compose UI and navigation tests |
-| Min SDK | API 24 with core library desugaring for calendar arithmetic. The starter launch is recorded in the [Phase 1 evidence](../specs/001-offline-flashcard-study/quickstart.md#phase-1-verification). |
+| Tests | JUnit for Kotlin rules, Room integration tests and representative Compose UI tests |
+| Android floor | API 24 with core library desugaring for calendar arithmetic |
 
-Pin compatible versions in the actual project, not this document. Do not add Retrofit, Kotlinx Serialization for networking, Hilt, Firebase, a remote backend or network permissions solely for hypothetical future use. Reassess if a future approved feature needs them.
+The existing project pins tool versions. The app performs its work on-device and needs no
+authentication, backend or network library.
 
 ## 3. Architecture
-
-Single app module, single-activity, layered UI and data architecture; a small pure scheduler/domain package is useful for testability. MVVM and unidirectional data flow: UI sends events, ViewModel coordinates work, repository owns data operations, observable state returns to UI.
 
 ```mermaid
 flowchart TD
     UI[Compose screens] --> VM[Screen ViewModels]
     VM --> R[Repositories]
-    R --> S[Pure scheduling policy]
     R --> DAO[Room DAOs]
-    DAO --> DB[(SQLite)]
-    R --> F[Private image storage]
+    DAO --> DB[(Room)]
+    R --> P[Preferences DataStore]
+    R --> S[Pure Kotlin review rules]
 ```
 
-- Manual dependency injection via Application-level AppContainer and ViewModel factory (compatible with course content). Follow the Inventory and Mars Photos samples. Inject DAOs directly into repositories. Use Flow for observations and suspend functions for one-time operations.
-- State hoisting for reusable presentational composables. Use lifecycle-aware state collection and preserve necessary UI state during rotation.
-- The repository and DAO check ownership using the profileId captured when the operation starts. On a switch the UI clears the previous stack and cancels its observations.
-- Use one Room transaction for the grade and schedule, and the (sessionId, cardId) primary key to prevent duplicate updates.
-- No use of destructive migration fallback for releases containing real user data. Establish migrations when schema changes.
+- One application-level AppContainer constructs repositories with direct DAO injection.
+  A standard ViewModel factory supplies dependencies. Use Flow for observations and suspend
+  functions for writes.
+- Compose collects state with lifecycle awareness and sends explicit events to ViewModels.
+  Keep editable drafts and the current study session in screen-owned state across rotation.
+- Repositories and DAOs use the profile ID captured at operation start. Study queries,
+  grade commits and summary reads also use the originating set. Clear the old UI and cancel
+  its observations on profile switch.
+- A grade appends one ReviewLog and updates the card schedule in one Room transaction.
+  The composite key (sessionId, cardId) prevents a repeated submission from committing twice.
 
-## 4. Conceptual data model
+## 4. Room v1 schema target
 
-| Entity | Main attributes / relationships |
+| Table | Fields and relationships |
 | --- | --- |
-| Profile | ID, display name, created timestamp |
-| Group | ID, owner profile, name, optional description |
-| FlashcardSet | ID, owner profile, optional group, name, optional description |
-| Flashcard | ID, parent set, front/back text, optional image references, created timestamp, stage, nullable review due date |
-| ReviewLog | Composite primary key (session ID, card ID), grade, actual review timestamp |
+| Profile | ID, display name, creation timestamp |
+| StudySet | ID, owner profile ID, name and optional description. The owner foreign key cascades on deletion. |
+| Flashcard | ID, parent set ID, front and back text, creation timestamp, stage and nullable dueDay. The set foreign key cascades on deletion. |
+| ReviewLog | Composite primary key (sessionId, cardId), grade and review timestamp. The card foreign key cascades on deletion. |
 
-Every child relationship must resolve to the same owner. Formal schema and ownership enforcement belong in the generated data model. Use a date-only representation for due dates and an instant for review logs; specify the time-zone policy in the plan.
+Store due dates as local calendar epoch days and review timestamps as instants. Index owned
+set lookups and card queries by set. Cards and logs inherit ownership through their parent set.
 
-## 5. Verification strategy
+The authorized pre-release transition replaces the old development schema and its v1 export
+with the four-table v1 baseline. FlashcardApp has no released installations or real user data.
+A clean development reset requires no migration from the former `study_groups` table.
+On startup, resolve any saved profile ID against the current database before showing a Set List.
+Future schema changes affecting released user data require a data-preserving migration.
 
-- Pure unit tests for every stage transition, cap, forgetting, due/overdue rules and date boundaries using explicit local dates.
-- Room tests for cross-profile access, foreign keys, group deletion, set/profile deletion, and atomic/idempotent grading.
-- Compose tests for front/back flip, rating gating, summary, validation and profile switching.
-- Manual offline/restart, rotation and resized window smoke tests.
-- Typical commands from project root: `./gradlew assembleDebug`, `./gradlew testDebugUnitTest`, `./gradlew connectedDebugAndroidTest` (requires an emulator/device; use gradlew.bat on Windows).
+## 5. Verification
 
-## 6. References
+- **JVM:** schedule transitions, eligibility, local calendar boundaries and summary calculations.
+- **Room:** two profiles and stale IDs, cascades, file reopen, atomic rollback, retry and duplicate grades.
+- **Compose:** representative profile navigation, invalid input, answer reveal, grading and summary return.
+- **Device:** debug build and airplane-mode walkthrough with restart, rotation and core controls in both orientations at 100% and 130% font scale.
 
-- [Android Basics with Compose](https://developer.android.com/courses/android-basics-compose/course)
-- [Android architecture recommendations](https://developer.android.com/topic/architecture/recommendations)
-- [Android data layer](https://developer.android.com/topic/architecture/data-layer)
-- [Manual dependency injection](https://developer.android.com/training/dependency-injection/manual)
-- [Android offline-first guidance](https://developer.android.com/topic/architecture/data-layer/offline-first)
+## 6. Course references
 
-Future remote data sources may be introduced behind repositories, but synchronization, conflicts, security and migrations would require a new design and specification; they are not guaranteed to be refactor-free.
+Use [Android Basics with Compose](https://developer.android.com/courses/android-basics-compose/course)
+as the primary learning reference. Inventory demonstrates Room, direct DAO repository injection
+and the ViewModel factory. Mars Photos demonstrates manual application container wiring. Dessert
+Release demonstrates Preferences DataStore. Cupcake demonstrates a single NavHost with navigation
+callbacks. Use the local sample projects as read-only references.

@@ -1,64 +1,64 @@
 # Project Overview — Flashcards: Spaced Repetition Learning
 
-| Item | Description |
+| Item | Value |
 | --- | --- |
-| Version | 1.1 — planning baseline for review |
-| Updated | 2026-11-21 |
+| Scope baseline | 3.0 |
+| Updated | 2026-11-28 |
 | Course | Introduction to Mobile Programming |
 | Platform | Native Android |
-| Duration | 3 weeks |
+| Delivery | One developer, three weeks |
 
 ## 1. Product concept
 
-Flashcards is a local-first Android application that helps students organize study material, recall answers actively, and revisit cards at scheduled intervals. It combines the simplicity of two-sided physical flashcards with self-assessed recall and spaced repetition. It is inspired by Quizlet and Anki, not a clone.
+FlashcardApp helps learners create two-sided text cards, test their recall and revisit cards
+at scheduled intervals. All profiles, sets, cards and review records stay on the device.
+Several learners can keep independent libraries on the same installation using local profiles.
 
-## 2. Problem and objectives
+## 2. MVP scope
 
-- Learners need a convenient way to create reusable question–answer material, organize it by subject, and review it without an Internet connection.
-- The application should minimize distractions, make daily review easy to start, and retain learning data between launches.
-- Users should be able to personalize their workspace with independent local profiles and organized sets; visual customization is deliberately limited to avoid unnecessary complexity.
-- The development team should demonstrate maintainable Kotlin code, clean separation of concerns, lifecycle-aware state management, persistent storage, and independently testable business rules from Android Basics with Compose.
+The release follows one path: **Profile Selection/Management → Set List → Set Detail →
+Graded Study → Review Summary**. Set and card management uses one shared editor screen.
+A valid saved profile opens its Set List on launch. Done on Review Summary returns to the
+set that started the session.
 
-## 3. Target users
+- Create, rename, select and confirm deletion of local profiles. Scope all library and study
+  operations to the selected profile.
+- Create, view, edit and delete study sets and their two-sided text cards. Validate input
+  and confirm destructive actions.
+- Study new or due cards from one set. Reveal the answer before rating Remembered or Forgot.
+  Save each rating and its next review date together. Show committed counts and recall rate
+  in Review Summary.
+- Complete the flow offline from first launch through restart. Use Kotlin, Jetpack Compose,
+  Room, Preferences DataStore, MVVM, unidirectional data flow and manual dependency injection.
 
-Students, self-directed learners and people studying vocabulary, definitions, facts or other short question–answer material. Multiple people may use the same installation through separate local profiles. Profiles are data partitions, not password-protected accounts.
+## 3. Release boundaries
 
-## 4. Scope
+v1 excludes Group/Ungrouped organization and set moves, Free Study and flippable previews,
+a separate Home screen and profile-wide review. Card images, aggregate coverage, countdown,
+appearance personalization and enhanced tablet/foldable layouts are deferred beyond v1.
+Online accounts, authentication, cloud sync, backend APIs, public sharing, collaboration,
+AI generation, push reminders and CSV import/export are outside the release.
 
-### MVP (required)
-
-- Local profiles and per-profile library isolation.
-- Groups containing flashcard sets, with a default ungrouped library.
-- Create, view, edit and delete sets and two-sided text flashcards.
-- Free study (ungraded) and graded review with Remembered / Forgot ratings.
-- Local spaced-repetition scheduling, due-card selection and session summaries.
-- Data persistence, input validation, empty states, deletion confirmation and phone-friendly UI.
-
-### Extended scope (only after MVP stability)
-
-- Optional images on either side of a card (P2), subject to validation and safe local storage.
-- Profile-level review coverage bar and basic aggregate statistics.
-- Enhanced layouts for tablets/foldables. Basic resizing and orientation correctness are MVP.
-- Optional recall countdown, visual workspace personalization beyond names and organization.
-
-### Explicitly out of scope for v1.0
-
-Online accounts, authentication, cloud synchronization, sharing marketplace, backend APIs, collaborative editing, AI card generation, push reminders and CSV import/export. Installation/build may require Internet for dependencies; normal app use must not.
-
-## 5. Deliverables and milestones
+## 4. Deliverables and milestones
 
 | Week | Target |
 | --- | --- |
-| 1 | Confirm scope, generate/review Spec Kit files, establish local storage and profile/set/card CRUD. |
-| 2 | Complete both study modes, scheduling, session summaries and unit tests; add card images if core flow is stable. |
-| 3 | Verify isolation, persistence and UI; implement selected extensions if time permits; prepare demo and report. |
+| 1 | Align the specifications with the solo MVP, establish the four-table development baseline and connect profile and set/card management. |
+| 2 | Complete set-scoped Graded Study, scheduling and Review Summary. |
+| 3 | Verify isolation, persistence and the core UI flow, then prepare the offline demo and report. |
 
-## 6. Success indicators
+## 5. Success indicators
 
-The demo can create two profiles with separate libraries, create at least one group/set and cards, study without grades, grade due cards, see next review dates, restart the app, and confirm that prior data survives in airplane mode. Build and relevant tests pass. Detailed requirements and acceptance criteria are in [requirements](2-Functional%20Requirements.md).
+In airplane mode, select a profile, create a set and text cards, study that set, see the
+session summary and restart to verify cards and next review dates. A second profile shows only
+its own sets. A debug build and focused JVM, Room and Compose checks provide release evidence.
 
-## 7. References and document status
+## 6. References and document status
 
-- [Quizlet](https://quizlet.com/) and [Anki](https://apps.ankiweb.net/): product inspiration.
-- [Android Basics with Compose](https://developer.android.com/courses/android-basics-compose/course): course material and learning foundation.
-- This file records product intent. The [specification clarifications of 2026-11-21](../specs/001-offline-flashcard-study/spec.md#session-2026-11-21) record the approved profile, field, deletion, scheduling and interruption decisions for the MVP. Do not treat this document as generated code instructions.
+- [Functional requirements](2-Functional%20Requirements.md)
+- [Business rules](4-Business-Rules.md)
+- [Android Basics with Compose](https://developer.android.com/courses/android-basics-compose/course)
+- [Constitution v3.0.0](../.specify/memory/constitution.md)
+
+The v3.0 product baseline supersedes the earlier scope. The feature specifications and Phase 2
+implementation record still describe the previous baseline and will be reconciled in a later step.

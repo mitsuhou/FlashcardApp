@@ -1,40 +1,23 @@
-# Specification Quality Checklist: Offline flashcard study and scheduled review
+# Specification Quality Checklist — Set-scoped flashcard study
 
-**Purpose**: Review the completeness and testability of the P1 specification before planning.  
-**Created**: 2026-11-21  
-**Feature**: [Offline flashcard study and scheduled review](../spec.md)
+**Baseline**: v3.0 · **Scope**: documentation review. Use the
+[specification](../spec.md) and [approved requirements](../../../docs/2-Functional%20Requirements.md).
 
-## Content Quality
+## Content and scope
 
-- [x] The specification describes observable behavior and leaves implementation choices to planning.
-- [x] Each story identifies a learner need and its value.
-- [x] Key terms and scheduling outcomes are explained for course reviewers and learners.
-- [x] All mandatory specification sections are complete.
+- [x] Three P1 stories describe independent profile, set/card and Graded Study workflows with acceptance scenarios.
+- [x] Six screen types and IDs match the [app description](../../../docs/5-App-Description.md).
+- [x] Profile selection or restoration opens Set List, and Set Detail starts study for one set.
+- [x] The active FR, NFR and BR IDs are traceable. Retired FR-03, FR-07, BR-04 and BR-09 remain reserved, and deferred requirements stay outside v1.
+- [x] The scope and release criteria use the [v3.0 constitution](../../../.specify/memory/constitution.md).
 
-## Requirement Completeness
+## Acceptance and readiness
 
-- [x] No unresolved template or clarification markers remain. Source proposals are identified.
-- [x] Requirements give testable outcomes for the approved MVP.
-- [x] The six success criteria give observable pass conditions.
-- [x] Success criteria can be evaluated independently of the implementation technology.
-- [x] All four stories have Given–When–Then acceptance scenarios and independent starting data.
-- [x] Edge cases cover empty states, stale access, date changes, interruptions and failed or repeated writes.
-- [x] P1 scope is bounded and all P2/P3 identifiers are mapped to deferred work.
-- [x] Assumptions, offline constraints, source discrepancies and approved decisions are explicit.
+- [x] Selection recovery, stale IDs, confirmation and switch-time isolation have observable outcomes.
+- [x] Set and card validation, limits, preserved history and deletion effects are specified.
+- [x] Eligibility, tie ordering, answer reveal, save/rollback/retry and summary return are testable.
+- [x] Offline restart, rotation, reachable controls, font scale and contrast are measurable.
+- [x] The [plan](../plan.md), [task index](../tasks.md#acceptance-and-scope-index) and [validation matrix](../quickstart.md#automated-acceptance-matrix) trace to all six success criteria.
 
-## Feature Readiness
-
-- [x] All P1 functional requirements map to stories and have acceptance conditions.
-- [x] Scenarios cover the primary flows for shared profiles, library maintenance and both study modes.
-- [x] Success criteria cover the outcomes the feature must demonstrate.
-- [x] The specification leaves detailed architecture, tooling and storage design to the plan.
-
-## Notes
-
-Reviewed all 15 FR, 10 NFR and 15 BR identifiers, the 11 screens, and links to the six source
-documents and seven images. The BR-12 table includes the cap, reset and late-review behavior.
-The checklist evaluates specification quality. The five product decisions recorded on
-2026-11-21 were resolved in the [clarifications](../spec.md#session-2026-11-21).
-The [2026-11-23 decisions](../spec.md#session-2026-11-23) define profile ownership,
-grade saving and date refresh. The starter launch on API 24 is recorded in the
-[quickstart](../quickstart.md#phase-1-verification). Feature checks remain pending.
+The checked items record written requirement quality. The
+[current status](../current.md) tracks implementation and runtime approval.

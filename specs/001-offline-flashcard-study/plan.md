@@ -1,125 +1,98 @@
-# Implementation Plan: Offline flashcard study and scheduled review
+# Implementation Plan — Offline flashcard study and scheduled review
 
-**Feature**: `001-offline-flashcard-study` · **Git branch inspected**: `main` · **Revised**: 2026-11-23
+**Feature**: `001-offline-flashcard-study` · **Baseline**: v3.0 · **Updated**: 2026-11-28
 
-**Authority**: [Clarified MVP specification](spec.md) and [project constitution v2.0.0](../../.specify/memory/constitution.md)
+The approved [specification](spec.md) delivers three P1 stories through six screens. Profile
+selection or restoration opens Set List. A learner can maintain sets and cards, start
+Graded Study from Set Detail, and return there from Review Summary. The whole journey works
+offline. The [constitution](../../.specify/memory/constitution.md) governs the plan.
 
-## Summary
+## Technical context
 
-Deliver a native Android workspace in which several local learners can build independent text-card libraries, browse a set without affecting its schedule, and grade new or due cards offline. All four stories are P1. Build the profile and library foundations first so both study modes operate on the same owned records. The demo must pass SC-01–SC-06, including a restart in airplane mode.
-
-## Technical Context
-
-| Area | Implementation choice |
+| Area | Choice |
 | --- | --- |
-| Platform and build | Single `:app`, package `com.example.flashcardapp`, one existing MainActivity. Keep minSdk 24, compile/target 37, AGP 9.3.3, Kotlin Compose plugin 2.2.10, Gradle 9.5.0, daemon JDK 25 and Java 11 bytecode. Desugar java.time for API 24–25. |
-| UI | Jetpack Compose, Material 3, Navigation Compose, one ViewModel per screen or closely related flow. Immutable screen state via StateFlow, lifecycle-aware collection and explicit event handlers. |
-| Data and logic | Room/SQLite stores the library and review history. One Preferences DataStore stores the active profile ID. Application-level AppContainer passes DAOs directly to three repositories. A standard ViewModel factory supplies the repositories. Kotlin Coroutines and Flow carry asynchronous work and observations. |
-| Verification | JVM rule and ViewModel tests, instrumented Room and Compose tests, and manual airplane-mode, restart, rotation and accessibility walkthroughs. Keep tests in the existing test source sets. |
-| Scale and performance | One installation, multiple local workspaces. Use indexed, profile-scoped queries, aggregate counts in SQLite, lazy lists and a review snapshot of IDs. Read the current card on demand. No agreed numeric latency, library-size or throughput target. |
-| Compatibility evidence | The existing project is an Android Studio greeting template with example tests. The connected WayDroid runtime is API 33. The Phase 1 starter launched on API 24. T050 checks calendar behavior on API 24. The course presentation device has yet to be identified. |
+| Platform | One `:app` module and MainActivity, package `com.example.flashcardapp`. Keep minSdk 24, compile/target 37, AGP 9.3.3, Compose plugin 2.2.10, Gradle 9.5.0, daemon JDK 25 and Java 11 bytecode. Desugar java.time for API 24–25. |
+| UI | Kotlin, Compose Material 3 and one Navigation Compose host. Screen ViewModels expose immutable StateFlow collected with lifecycle awareness. A shared editor handles sets and cards. |
+| Data | Four Room tables, one Preferences DataStore for selected profile, three repositories with direct DAO injection and one Application-owned AppContainer. Use the standard ViewModel factory. |
+| Scope and dates | Repository calls capture profileId. Study, grading and session counts require setId as well. The current local calendar day drives eligibility and schedule calculations. |
+| Verification | Pure JVM rules, Room integration, representative Compose tests, a debug build and a short offline walkthrough. Use the current development device and a brief API 24 compatibility check. |
 
-Exact catalog additions, repository evidence and deviations from the original design notes are in [research.md](research.md).
+The [research record](research.md) explains reference choices and the [data model](data-model.md)
+defines table constraints, repository boundaries and the development reset.
 
-## Constitution Check
+## Constitution check
 
-**Pre-research gate: pass.** Each principle below has a design decision and a verification method. **Post-design gate: pass.** The schema, navigation boundaries and test plan implement those decisions without an exception. These results evaluate the design; the implementation will supply test evidence.
+The revised design covers each principle. Runtime evidence for open tasks is pending.
 
-| Principle | Design decision | Evidence required at release |
-| --- | --- | --- |
-| I. Offline operation | Every data path ends in private local storage. | First launch through restart with radios offline, SC-01–SC-04. |
-| II. Maintainable Kotlin and Compose | Stateless reusable content, screen-owned drafts and study progress, labeled and scalable controls. | Recreate the activity and exercise primary actions in both orientations, SC-06. |
-| III. MVVM, UDF and repositories | Events enter a ViewModel. Read flows and command results produce immutable state. Screens cannot access DAOs. | Code review and a Compose test with zero grade commands before the tap, one through recompositions during save, and one advancement after commit. |
-| IV. Profile isolation | Pass the originating profileId to each owned DAO operation. Clear old screens and cancel their observations when switching. | Try foreign IDs from B and complete an already-started A write. Only A may receive that write, SC-01. |
-| V. Durable local writes | Room constraints, group detachment in one transaction, cascading owned deletions, atomic review log/schedule writes and durable duplicate prevention. | Real Room rollback, retry, deletion and file reopen cases, SC-04–SC-05. |
-| VI. Independently testable business rules | Pure eligibility, schedule and summary rules with controlled dates and grades. | JVM tests for every transition, boundaries and empty summary, SC-02–SC-04. |
-| VII. Minimal dependencies and architecture | One app, one activity, manual injection and only feature-required catalog additions. | Review resolved dependencies against the research record and verify the build. |
-| VIII. Traceable, approved scope | Keep US1–US4 at P1. Map seven implementation phases and each screen to acceptance evidence. | Acceptance matrix in [quickstart.md](quickstart.md) covers all six success criteria. |
-
-## Project Structure
-
-### Documentation for this feature
-
-| Artifact | Use |
+| Principle | Design and evidence |
 | --- | --- |
-| [spec.md](spec.md) | Product behavior, priorities, clarifications and seven visual references |
-| [research.md](research.md) | Repository inventory, selected dependencies, alternatives and source conflicts |
-| [data-model.md](data-model.md) | Room entities, indexes, ownership checks, DAO/repository responsibilities, ordering and commit protocol |
-| [quickstart.md](quickstart.md) | Build and device prerequisites, tests and course-demo walkthrough |
-
-The feature exposes only local screens. Their interaction contract is captured below and in UI-01–UI-11. There is no external API, file interchange format or independently released client that needs a separate contract.
-
-### Source code in the repository
-
-| Path | Existing or planned use |
-| --- | --- |
-| `settings.gradle.kts`, `build.gradle.kts`, `gradle/libs.versions.toml`, `app/build.gradle.kts` | Existing module and catalog. Add only the libraries and build processors listed in research. |
-| `app/src/main/java/com/example/flashcardapp/` | Existing MainActivity. Add the Application and its AppContainer here. |
-| `ui/` beneath that package | Extend existing `ui/theme/`. Group navigation, shared components, profile, library/editor, and study screens by actual workflow. Keep ViewModels beside their screens. |
-| `data/` beneath that package | Planned Room database, entities, projections and DAOs in `data/local/`; repositories and preference-backed selection in the data package. |
-| `domain/` beneath that package | Planned pure Kotlin study rules and validation shared by editors and repositories. |
-| `app/src/main/AndroidManifest.xml`, `app/src/main/res/xml/` | Register the Application, keep one launcher activity, and configure local storage backup exclusions. |
-| `app/src/test/java/com/example/flashcardapp/`, `app/src/androidTest/java/com/example/flashcardapp/` | Existing JVM and device test roots. Add feature tests here. Export Room schema versions under planned `app/schemas/` for migration checks. |
+| I. Offline operation | Room and DataStore serve the full flow on-device. Run the airplane-mode walkthrough and inspect the merged release manifest (SC-01, NFR-01, NFR-07). |
+| II. Maintainable Kotlin and Compose | Stateless reusable content, labeled ratings, rotation-safe drafts and session state. Verify reachability at both font scales and orientations (SC-06). |
+| III. MVVM, UDF and repositories | Compose sends explicit events. ViewModels expose state and call repositories. Test that recomposition alone triggers no grade command. |
+| IV. Profile isolation | Gate destinations on validated selection. Scope study to the original profile and set. Check stale IDs, Back after switching and a started A write completing while B is selected (SC-01). |
+| V. Durable local writes | Use Room foreign keys, a scoped grade transaction, unique session/card key and file reopen tests. Apply the approved pre-release development reset (SC-04, SC-05). |
+| VI. Independently testable business rules | Test the schedule, eligibility and committed summaries with explicit local dates (SC-03, SC-04). |
+| VII. Minimal dependencies and architecture | Use Inventory, Mars Photos, Cupcake and Dessert Release patterns in one module with manual DI. Retain the toolchain and dependency baseline. |
+| VIII. Traceable, approved scope | Map all active requirements and success criteria to tasks and evidence in the [task index](tasks.md#acceptance-and-scope-index) and [validation matrix](quickstart.md#automated-acceptance-matrix). |
 
 ## Runtime design
 
-**Selection and navigation.** Start behind a neutral loading screen. Read the saved selection from DataStore and resolve the ID against Room. A valid selection opens Home. An invalid or deleted selection opens the selector when any profiles remain, including one, or profile creation when none remain. A failed read offers retry. While the selector awaits explicit selection, no profile is active and no library is visible.
+### Profile selection and routes
 
-**Ownership across a switch.** Pass simple item IDs in routes and use the selected profileId
-for every new operation. A switch clears the back stack, drafts and session, cancels old UI
-observations and opens the new Home. A stale item ID returns safely to the current library
-or selector. A started write retains its original profileId. The [data model](data-model.md#repositories-selection-and-access)
-defines the DAO filters and parent checks.
+Resolve the stored selection before displaying any library route. A valid selection opens
+Set List. With no profiles, show creation. With existing profiles and no valid selection,
+require a choice even for one survivor. A read failure offers Retry. The Set List profile
+control opens profile selection and management.
 
-**Unidirectional data flow.** Route composables collect ViewModel state with `collectAsStateWithLifecycle` and pass values plus callbacks into screen content. ViewModels collect owner-scoped repository flows, run commands in their coroutine scope and expose loading, content, saving and retry states. A save or grade runs only in response to an explicit event. Keep draft fields, card index, visible face and reveal state across activity recreation. Keep persisted selection and confirmed records in storage. On process recreation revalidate selection before restoring any route and discard an interrupted review snapshot.
+Use a single NavHost with simple scalar record IDs. A switch clears the departing profile's
+stack, drafts, session and screen observations before showing the new Set List. Owned routes
+use the validated profile ID, check parent records and safely return to the current Set List
+or selector when a stale item is unavailable. An already-started write may finish only against
+its captured profile ID.
 
-**Time and study.** Read the device-local date on screen resume and review start. Refresh counts
-and request the eligible IDs for that date. An empty result stays on Home or Set Detail.
-LibraryRepository supplies read-only practice cards. ReviewRepository submits a revealed
-card's grade with one DAO call. Use the ordinary saving state to disable grading, Exit and
-system Back until success or failure. The [grade transaction](data-model.md#grade-transaction)
-defines the two writes, uniqueness and rollback.
+### Library and study state
 
-## Screens and navigation
+LibraryRepository supplies set list rows, detail rows, set/card writes and scoped counts.
+Refresh counts on data changes and after a local day change on foreground return. Editors use
+the same validation as repositories and retain failed or unfinished drafts.
 
-Use a single Navigation Compose host for the active workspace. Home, Library and Profile are the three top-level browsing destinations. Library opens on Study Sets. Push Group Detail and Set Detail from their parent lists. Open editors with the selected parent/item ID and pop on successful save or confirmed discard. Study screens hide browsing navigation. Graded Review captures its origin so Done returns to the initiating Home or Set Detail.
+Set Detail starts a session only when ReviewRepository returns eligible IDs for the current day
+and chosen set. Keep the snapshot, session ID, profile ID, set ID, original slot and reveal state
+in the study ViewModel. Screen ratings enter through explicit events. The saving state blocks
+ratings, Exit and Back until the atomic transaction finishes. Use the captured profile and set
+to read summary totals with `getSessionCounts`. Process restart can build a fresh queue.
 
-| Screen and design basis | Implementation and observable behavior |
-| --- | --- |
-| UI-01, UI-02, UI-11 · onboarding, Home, Profile | List local profile names, active marker and create/rename/select/confirmed delete actions. Home names the active profile, shows separate new/due counts, Review now and Library. An empty workload offers Library. |
-| UI-03 · REF-01, REF-02 | Library identifies the active profile by display name. Dark top bar with one add action; Study Sets and Groups tabs with lavender selection indicator. Lazy lists show rounded outlined set rows with total/eligible counts and group rows with set counts. Empty lists offer creation. |
-| UI-04 · REF-03 | Large group title, description, set count, Add study set and owned set rows. Edit/delete overflow names the affected group and explains that sets move to Ungrouped. |
-| UI-05, UI-07 · forms | Labeled scrollable fields, inline errors, Save/Cancel and discard confirmation. Card forms require both faces. Set forms choose an owned group or Ungrouped. Retain input on failure. |
-| UI-06 · REF-04, REF-05, REF-06 | Large horizontally browsable flashcard, position indicator, set metadata, Free Study and Grade Mode, Add card and editable card rows. Reviewed rows show their saved next date. Use a dark action sheet with Edit, Move to group, Delete and Cancel. |
-| UI-08 · Free Study | Show all cards in one owned set. Share the card face and flip controls with preview. Previous/Next stop at the ends. Card changes reset to Front. No grading operation is available on this path. |
-| UI-09 · REF-07 | Front-first review, reveal before self-rating, original one-based position out of the frozen queue size, and committed-review count. A skipped card retains its slot and contributes zero ratings. Keep the reveal flag when flipping back. In landscape put ✗ Forgot, position and ✓ Remembered below the card. In portrait keep both actions reachable under it. Disable both ratings, Exit and system Back during save. On success advance once. On rollback keep the revealed card for retry. Restore navigation in both cases. |
-| UI-10 · summary | Display reviewed, remembered, forgot and rounded recall percentage. Omit the percentage when reviewed is zero. Confirm early exit while unreviewed cards remain. Cancel resumes the same session. |
-
-Reuse a card-face composable with explicit Flip and accessible browse actions, a set row, form-field/error presentation and named confirmation dialogs. Use navy backgrounds, blue-gray card surfaces, light text and indigo primary actions from the dark Material 3 palette. Use native insets, touch targets at least 48 × 48 dp, labeled icons and text-plus-symbol recall controls. Long faces scroll within the card. Provide a static flip state when animations are disabled. Validate reachable controls and text contrast (4.5:1 normal, 3:1 large) in portrait and landscape at both default (100%) and 130% font scale. The [UI description and seven supplied references](../../docs/6-ui-design/ui-description.md) guide presentation.
-
-## Implementation sequence
-
-Phase 1 is verified. Each later phase starts with explicit user approval. Review tasks individually in ID order. Dependency order differs from story numbering. Each story retains P1 priority.
-
-| Phase | Depends on | Deliverable and exit evidence |
+| ID | Screen | Implementation |
 | --- | --- | --- |
-| **1. Setup and shared configuration** · Week 1 | Existing starter | Configure catalog dependencies, KSP, the Room schema export directory, desugaring, test host, theme and local-only backup rules. Inspect the manifest and resolved dependencies, build the debug starter and launch it on API 24. NFR-01, NFR-06, NFR-07, NFR-09. |
-| **2. Database, repositories and shared foundations** · Week 1 | 1 | Implement the five tables, indexes, scoped DAOs, three repositories, profileId-based ownership, shared validation and pure scheduler with an explicit date. Generate and inspect the v1 Room schema. Wire the concrete Application, AppContainer and constructor-based ViewModel factory. Prove scoped CRUD, cross-owner rejection, atomic grade rollback/retry and file reopen before wiring screens. FR-01–FR-05, FR-08–FR-12, BR-01–BR-07, BR-10–BR-13, NFR-02, NFR-08. |
-| **3. US4 – Local Profiles (P1)** · Week 1 | 2 | Connect onboarding, profile management, Home shell and selection-aware navigation. Use fresh storage for onboarding and repository-seeded A/B fixtures for switching. Verify valid restoration, zero profiles, explicit one-survivor selection, distinct Home counts and Back isolation on Home/Profile. Verify old screen observations stop on switch. This supplies partial SC-01 evidence. FR-01, FR-02, FR-10, FR-12, UI-01, UI-02, UI-11. |
-| **4. US3 – Study Library (P1)** · Week 1 into early Week 2 | 2, 3 | Connect Library tabs, group/set detail, editors, preview and action sheet. Test field boundaries, cancel/save failures, preservation after edits/moves, group detachment and deletion cascades. FR-03–FR-05, FR-10, FR-12, UI-03–UI-07, SC-01, SC-05. |
-| **5. US2 – Free Study (P1)** · Week 2 | 4 | Use the owned set projection and shared card UI for repeatable flips and bounded navigation through every card. Verify unchanged learning state for preview and practice with new, due and future cards. FR-07, BR-09, UI-06, UI-08, SC-02. |
-| **6. US1 – Graded Review (P1)** · Week 2 | 2–5 | Connect both review entry points to frozen eligible queues, reveal gating, atomic grading, retry, dates on card rows, summaries and return navigation. Exercise the ladder, duplicates, zero grades, process loss, date rollover and empty queue. FR-08–FR-12, UI-02, UI-06, UI-09, UI-10, SC-03, SC-04. |
-| **7. Integration testing and final validation** · Week 3 | All four stories | Run JVM, Room and Compose suites, check the actual release manifest and perform the offline demo. Run the API 24 calendar smoke test. Exercise real stale Set Detail and review routes across profile switches, restart, saved grades and confirmed deletion. Complete the entire SC-06 journey in each orientation at each font scale. Record device/API and pass results for NFR-01–NFR-09 and SC-01–SC-06. Reserve time for defects and the course demo/report. |
+| UI-01 | Profile Selection/Management | Profile ViewModel and screen, with create, rename, select, delete and recovery states. |
+| UI-03 | Set List | Profile label/control, list of owned sets, counts and Create set. |
+| UI-06 | Set Detail | Metadata, counts, editable cards and saved dates. Add card, Edit/Delete set and Start study. |
+| UI-05 | Set/Card Editor | One screen for both editor forms with shared validation, draft handling and return to parent. |
+| UI-09 | Graded Study | Explicit Flip, reveal-gated ratings, frozen position, committed count, saving/retry and exit confirmation. |
+| UI-10 | Review Summary | Committed totals and defined recall percentage. Done returns to originating Set Detail. |
 
-## Test strategy and release boundary
+Follow the [UI description](../../docs/6-ui-design/ui-description.md) for dark styling,
+adaptive controls and current reference usage.
 
-Use JVM tests for dates, percentages, validation and ViewModel decisions. Use Android Room tests
-for ownership, rollback, duplicate submissions and file reopen. Use Compose tests for switch
-navigation, date refresh on resume, reveal, saving, retry and summary. In the saving test, try
-Exit and system Back and verify navigation recovers after either outcome. The
-[acceptance matrix](quickstart.md#automated-acceptance-matrix) gives the fixtures and expected
-results. Finish with the offline demo and restart.
+## Implementation phases
 
-Release requires all four stories, a passing debug build and the constitution's verification evidence. Profiles are logical partitions on one installation. FR-06/BR-08 (images), FR-13/BR-14 (coverage), FR-14/BR-15 (timer), FR-15 (appearance choices) and NFR-10 (enhanced tablet/foldable layouts) are deferred. P1 keeps ordinary resizing, landscape and font scaling. The approved screen actions exclude screenshot-only controls such as group-wide review, hints, shuffle and undo.
+| Phase | Tasks | Depends on | Exit evidence |
+| --- | --- | --- | --- |
+| 1 · Project setup and shared configuration | T001–T005 | Starter project | Approved debug starter, tests, manifest, dependencies and API 24 launch. |
+| 2 · Database, repositories and shared foundations | T006–T023 | 1 | Four-table v1 export, targeted JVM/Room suites, owned CRUD and selection, set-scoped queues and summaries, atomic grades and file reopen. Reverify the reopened tasks in ID order. |
+| 3 · Local Profiles & Navigation (US3) | T024–T026 | 2 | Profile UI and NavHost, validated selection to the Set List route, and clearing the previous profile's destinations. Set List content is connected in Phase 4. |
+| 4 · Study Sets & Flashcards (US2) | T027–T030 | 3 | Set List, Set Detail and shared editor work end to end. Verify representative CRUD/validation, saved dates and count refresh. |
+| 5 · Graded Study & Summary (US1) | T031–T033 | 4 | One-set study, reveal gating, commit and retry, summary and return to origin. Run study ViewModel and Compose tests. |
+| 6 · Final Verification & Offline Demo | T034–T035 | 5 | Debug build and test results, manifest and API 24 check, then the offline demo, restart and accessibility evidence. |
 
-Supporting documents: [Project Overview](../../docs/1-Overview.md), [Functional Requirements](../../docs/2-Functional%20Requirements.md), [Tech Stacks](../../docs/3-Tech%20stacks.md), [Business Rules](../../docs/4-Business-Rules.md), [App Description](../../docs/5-App-Description.md) and [UI Description](../../docs/6-ui-design/ui-description.md).
+Keep each approved task's history. The Phase 2 implementation tasks that need v3.0 changes
+are reopened under their existing IDs. The four-table v1 reset uses a clean development
+installation and the updated schema export. All three stories must pass before the demo.
+Per-task and phase approvals follow [AGENTS.md](../../AGENTS.md).
+
+## Source layout
+
+Use existing `data/local/`, `data/` and `domain/` packages. Place screen state and content
+under `ui/profile/`, `ui/library/`, `ui/study/` and `ui/navigation/`. Keep test fixtures
+in existing test source sets and export schemas under `app/schemas/`. The
+[task list](tasks.md) names the affected files. No external client contracts are required.
