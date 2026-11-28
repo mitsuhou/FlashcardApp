@@ -1,12 +1,12 @@
 # FlashcardApp MVP status
 
-**2026-11-27 · Phases 1 and 2 complete. Phase 3 in progress.** The tracker shows **27 of 51 tasks complete** (T001–T027). T028–T051 are pending. [Implementation tasks](tasks.md)
+**2026-11-27 · Phases 1 and 2 complete. Phase 3 in progress.** The tracker shows **28 of 51 tasks complete** (T001–T028). T029–T051 are pending. [Implementation tasks](tasks.md)
 
 | Phase | Pending tasks |
 | --- | --- |
 | 1 · Project setup and shared configuration | None |
 | 2 · Database, repositories and shared foundations | None |
-| 3 · US4 Local Profiles | T028–T029 |
+| 3 · US4 Local Profiles | T029 |
 | 4 · US3 Study Library | T030–T037 |
 | 5 · US2 Free Study | T038–T041 |
 | 6 · US1 Graded Review | T042–T047 |
@@ -55,3 +55,7 @@
 **T026 approved.** The profile ViewModel restores selection, validates names and handles create, select, rename and delete events. Retry after creation selects the existing ID. Both debug APKs built and 24 JVM checks passed in a temporary project copy. The integrated Home observation test depends on T028.
 
 **T027 approved.** The profile screen supports creation, explicit selection, rename, and confirmed switch and deletion. Both debug APKs built and both focused Compose tests passed on WayDroid API 33, covering draft restoration, validation and confirmation callbacks. Six themed previews cover the profile UI states.
+
+**T028 approved.** Home displays the active learner and separate new and due counts, clears counts during switches and refreshes them on a local day change. All 19 JVM tests and the focused Home device test passed. Home includes empty and populated previews.
+
+**T029 awaiting approval.** MainActivity now gates Home and Profile on validated selection. The simplified routes passed 19 JVM tests and all 29 device cases across two installations, including activity recreation with a rename draft. [Phase 3 checkpoint and fixture details](quickstart.md#phase-3-profile-checkpoint)

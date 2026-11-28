@@ -34,6 +34,16 @@ On 2026-11-24, the debug app and instrumentation APKs built offline. All 15 JVM 
 
 The checkpoint passed. T023 was approved, completing Phase 2 (T006–T023).
 
+## Phase 3 profile checkpoint
+
+On 2026-11-27, the T029 review build passed `./gradlew --offline :app:assembleDebug :app:testDebugUnitTest :app:connectedDebugAndroidTest`. All 19 JVM tests and all 28 instrumentation tests passed, with zero skipped, on the JVM and WayDroid Android 13 (API 33) respectively.
+
+The three T024 tests launched MainActivity. They verified creation, rename and selection after activity relaunch, distinct workloads for two learners with same-name sets, Back isolation after switching, canceling a deletion, explicit selection of the sole survivor and return to creation after the last deletion. T025 verified that switching cancels the former learner’s count subscription and keeps Home clear until the new counts arrive.
+
+After simplifying navigation to fixed Home and Profile routes, the debug APK built and all 19 JVM tests passed. On WayDroid API 33, 25 of 29 device tests passed on the existing installation. The four profile flow tests stopped at their empty-storage precondition. All four then passed on a separate installation built from the same sources with a test-only application ID. The additional case recreated the activity while renaming, verified the restored draft, saved it on Profile and returned to Home with the same learner’s counts.
+
+T024–T028 are approved. T029 awaits review.
+
 ## Prepare and build
 
 1. Open the repository root (the directory containing `settings.gradle.kts`, `gradlew` and

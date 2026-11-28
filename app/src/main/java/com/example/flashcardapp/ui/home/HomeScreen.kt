@@ -27,8 +27,8 @@ import com.example.flashcardapp.ui.theme.FlashcardAppTheme
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onLibrary: () -> Unit,
-    onReviewNow: () -> Unit,
+    onLibrary: (() -> Unit)?,
+    onReviewNow: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshDate() }
@@ -39,8 +39,8 @@ fun HomeScreen(
 @Composable
 internal fun HomeBody(
     uiState: HomeUiState,
-    onLibrary: () -> Unit,
-    onReviewNow: () -> Unit,
+    onLibrary: (() -> Unit)?,
+    onReviewNow: (() -> Unit)?,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -64,10 +64,10 @@ internal fun HomeBody(
                 Text(stringResource(R.string.due_card_count, counts.dueCount))
                 val hasReviews = counts.newCount > 0 || counts.dueCount > 0
                 if (!hasReviews) Text(stringResource(R.string.no_reviews_due))
-                Button(onClick = onReviewNow, enabled = hasReviews) {
+                Button(onClick = { onReviewNow?.invoke() }, enabled = hasReviews && onReviewNow != null) {
                     Text(stringResource(R.string.review_now))
                 }
-                OutlinedButton(onClick = onLibrary) { Text(stringResource(R.string.library)) }
+                OutlinedButton(onClick = { onLibrary?.invoke() }, enabled = onLibrary != null) { Text(stringResource(R.string.library)) }
             }
         }
     }

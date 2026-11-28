@@ -113,6 +113,26 @@ class ProfileFlowTest {
     }
 
     @Test
+    fun recreationRestoresProfileDraftAndRenameKeepsTheSameRoute() {
+        seedProfiles()
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            tap("Alice")
+            assertHome("Alice", 2, 0)
+            tap("Profile")
+            tap("Rename")
+            displayed(hasSetTextAction()).performTextReplacement("Alice Nguyen")
+
+            scenario.recreate()
+            displayed(hasSetTextAction() and hasText("Alice Nguyen"))
+            tap("Save")
+            displayed(hasText("Rename"))
+            displayed(hasText("Alice Nguyen"))
+            tap("Home")
+            assertHome("Alice Nguyen", 2, 0)
+        }
+    }
+
+    @Test
     fun switchingOpensTheSelectedHomeAndBackCannotReopenTheOldProfile() {
         seedProfiles()
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
